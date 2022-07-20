@@ -1,0 +1,3 @@
+"F:\JetBrains\CLion 2021.1.2\bin\cmake\win\bin\cmake.exe" -E rm -f CMakeFiles\HybridTSSv1_2.dir/objects.a
+D:\MinGW\bin\ar.exe cr CMakeFiles\HybridTSSv1_2.dir/objects.a @CMakeFiles\HybridTSSv1_2.dir\objects1.rsp
+D:\MinGW\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\HybridTSSv1_2.dir/objects.a -Wl,--no-whole-archive -o HybridTSSv1_2.exe -Wl,--out-implib,libHybridTSSv1_2.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\HybridTSSv1_2.dir\linklibs.rsp
