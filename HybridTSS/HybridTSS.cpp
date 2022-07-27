@@ -9,33 +9,7 @@ HybridTSS::HybridTSS() {
 }
 
 void HybridTSS::ConstructClassifier(const vector<Rule> &rules) {
-//    train()
-
-
-
-    // After- train
-    // build
-//    ConstructBaseline(rules);
-//    root->printInfo();
-//    cout << "root reward: " << root->getReward()[0][2] << endl;
-//    return ;
     train(rules);
-
-    // Q-Table
-//    for (int i = 0; i < QTable[0].size(); i++) {
-//        if (QTable[0][i] != 0) {
-//            cout << "action: " << i << "\tdim: " << (i / 16)  << "\tbit: " << (i & 15) << "\t" << QTable[0][i] << endl;
-//        }
-//    }
-//    for (const auto& iter : QTable) {
-//        for (auto i : iter) {
-//            if (i != 0) {
-//                cout << i << " ";
-//            }
-//        }
-//        cout << endl;
-//    }
-//    cout << "train finish" << endl;
     root = new SubHybridTSS(rules);
     queue<SubHybridTSS*> que;
     que.push(root);
@@ -60,13 +34,6 @@ void HybridTSS::ConstructClassifier(const vector<Rule> &rules) {
         }
     }
     vector<vector<int> > reward = root->getReward();
-//    root->printInfo();
-//    cout << "root reward: " << root->getReward()[0][2] << endl;
-
-//    cout << reward[0][1] << reward[0][2] << endl;
-//    for (int i = 0; i < QTable[0].size(); i++) {
-//        cout << i << "\t" << QTable[0][i] << endl;
-//    }
 
 
 }
@@ -106,6 +73,7 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
         cout << "state node exist" << endl;
         exit(-1);
     }
+    
     // Greedy for linear, TM,
     int s = state->getState();
     vector<Rule> nodeRules = state->getRules();
@@ -135,9 +103,6 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
         if ((s & (1 << 15)) == 0) {
             return {Hash, 3, 7};
         }
-//        if (nodeRules.size() <= rtssleaf * tupleKey.size()) {
-//            cout << "nodeID:#" << state->nodeId << "\ts:" << s << endl;
-//        }
         cout << "nodeID:#" << state->nodeId << "\ts:" << s << endl;
         return {TM, -1, -1};
     }
@@ -153,7 +118,6 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
             }
             Actions.push_back({Hash, i, j});
             int act = (i << 4) | j;
-//            int act = (3 << 6) | (i << 4) | j;
             rews.push_back(QTable[s][act]);
         }
     }
@@ -179,8 +143,6 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
 
 
     return {linear, -1, -1};
-
-//    return vector<int>();
 }
 
 void HybridTSS::ConstructBaseline(const vector<Rule> &rules) {
@@ -282,12 +244,6 @@ void HybridTSS::train(const vector<Rule> &rules) {
         }
         vector<vector<int> > reward;
         reward = tmpRoot->getReward();
-//        cout << "reward size:" << reward.size() << "\t reward:" << reward[0][2] << endl;
-//
-//        for (auto iter : reward) {
-//                cout << "state:" << int2str(iter[0], 20) << "\taction:" << iter[1] << "\t" << int2str(iter[1], 8) << "\treward:" << iter[2] << endl;
-//        }
-//        exit(-1);
         for (auto iter : reward) {
             if ((iter[1] >> 6) != 3) {
                 continue;
@@ -297,20 +253,10 @@ void HybridTSS::train(const vector<Rule> &rules) {
             if (QTable[s][a] == 0) {
                 QTable[s][a] = r;
             } else {
-//                if (s == 0) {
-//                    cout << "before QTable:" << QTable[s][a] << "\t";
-//                }
                 QTable[s][a] += lr * (r - QTable[s][a]);
-//                if (s == 0) {
-//                    cout << "After QTable: " << QTable[s][a] << "\treward:" << r << endl;
-//                }
             }
-//            cout << s << "\t" << a << "\t" << QTable[s][a] << endl;
         }
         int act = reward[0][1] & ((1 << 6) - 1);
-//        cout << i << "\tstate:" << reward[0][0] << "\taction:" << act  << "\treward" << reward[0][2] << "\tQTable:  " << QTable[reward[0][0]][act] << endl;
-//        exit(-1);
-//        cout << reward.size() << endl;
         tmpRoot->recurDelete();
         delete tmpRoot;
     }

@@ -1,6 +1,10 @@
-./.idea
-./cmake-build-debug
-./1
-./.vscode
-./*.o
-./*.exe
+.idea
+cmake-build-debug/
+acl_*
+result*
+*.o
+run.py
+fw*
+.*
+ErrorLog.csv
+1
