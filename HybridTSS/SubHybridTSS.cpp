@@ -1,15 +1,12 @@
-//
-// Created by lyx on 2022/3/7.
-//
-
 #include "SubHybridTSS.h"
 
-//#include <utility>
-//#define DEBUG
-//#define CHECKONERULE
+// -----------------------------------------------------------------------------
+// func name: SubHybridTSS
+// description: 构造函数
+// To-do: 部分构造方式不再使用，冗余待删除
+// -----------------------------------------------------------------------------
 SubHybridTSS::SubHybridTSS() {
     reward = -1;
-//    offsetBit = {0, 32, 0, 32, 0, 16, 0, 16};
     bigClassifier = nullptr;
     state = 0;
     maxBigPriority = -1;
@@ -18,7 +15,6 @@ SubHybridTSS::SubHybridTSS() {
 
 SubHybridTSS::SubHybridTSS(const vector<Rule> &r) {
     this->rules = r;
-//    offsetBit = {0, 32, 0, 32, 0, 16, 0, 16};
     state = 0;
     reward = 0;
     bigClassifier = nullptr;
@@ -27,7 +23,6 @@ SubHybridTSS::SubHybridTSS(const vector<Rule> &r) {
     bigOffset.resize(4, 0);
 
 }
-
 
 SubHybridTSS::SubHybridTSS(const vector<Rule> &r, vector<int> offsetBit) {
     this->rules = r;
@@ -55,13 +50,7 @@ vector<SubHybridTSS *> SubHybridTSS::ConstructClassifier(const vector<int> &op, 
     this->fun = op[0];
     action = 0;
     action |= (fun << 6);
-#ifdef DEBUG
-    cout << "SubHybridTSS" << endl;
-    cout << op[0] << " " << op[1] << " " << op[2] << endl;
-#endif
-#ifdef CHECKONERULE
 
-#endif
     switch(fun) {
         case linear: {
             break;
@@ -93,12 +82,8 @@ vector<SubHybridTSS *> SubHybridTSS::ConstructClassifier(const vector<int> &op, 
             break;
         }
         case Hash: {
-#ifdef DEBUG
-            cout << "Hash" << endl;
-#endif
             // modify action
             dim = op[1];
-//            bit = 9 + op[2];
             if (dim == 0 || dim == 1) {
                 bit = 12 + op[2];
             } else {
@@ -125,9 +110,6 @@ vector<SubHybridTSS *> SubHybridTSS::ConstructClassifier(const vector<int> &op, 
                 nHashBit ++;
             }
             this->nHashTable = (1 << nHashBit) - 1;
-#ifdef DEBUG
-            cout << "nHashBit:" << nHashBit << "\t" << "nHashTable:" << nHashTable << endl;
-#endif
             this->children.resize(nHashTable + 1, nullptr);
             vector<vector<Rule> > subRules(nHashTable + 1);
 
@@ -136,32 +118,16 @@ vector<SubHybridTSS *> SubHybridTSS::ConstructClassifier(const vector<int> &op, 
 //                    cout << "rule is here" << endl;
 //                }
                 if (r.prefix_length[dim] < bit) {
-#ifdef CHECKONERULE
-                    if (r.priority == 722) {
-                        r.Print();
-                        cout << dim << "\t" << r.prefix_length[dim] << "\t" << bit << endl;
-                        cout << nodeId << "\tbig" << endl;
-                    }
-#endif
                     bigRules.push_back(r);
                     maxBigPriority = max(maxBigPriority, r.priority);
                     continue;
                 }
                 uint32_t Key = getKey(r);
-#ifdef CHECKONERULE
-                if (r.priority == 722) {
-                    cout << nodeId << "\tHash Key:" << Key << endl;
-                    cout << children.size() << endl;
-                }
-#endif
                 if (Key >= subRules.size()) {
                     cout << "here" << endl;
                 }
                 subRules[Key].push_back(r);
             }
-#ifdef DEBUG
-            cout << "construct children" << endl;
-#endif
             for (int i = 0; i < nHashTable + 1; i++) {
                 if (!subRules[i].empty()) {
                     children[i] = new SubHybridTSS(subRules[i], hashChildenState, this);
@@ -347,8 +313,6 @@ uint32_t SubHybridTSS::getKey(const Packet &p) const {
 vector<vector<int> > SubHybridTSS::getReward() {
     vector<vector<int> > res;
     vector<int> currReward = {state, action, reward};
-//    cout << "state:" << int2str(state, 20) << "\taction:" << int2str(action, 8) << "\treward:" << reward << endl;
-//    cout << "state:" << state <<"\taction:" << action << "\t" << reward << endl;
     res.push_back(currReward);
     for (auto iter : children) {
         if (iter) {
@@ -403,28 +367,17 @@ void SubHybridTSS::FindRule(const Rule &rule) {
 #define DEBUGREDELETE
 #ifdef DEBUGREDELETE
 void SubHybridTSS::recurDelete() {
-//    cout << "before delete children" << endl;
     for (auto &iter : children) {
         if (iter) {
             iter->recurDelete();
             delete iter;
         }
     }
-//    cout << "before delete big" << endl;
     if(bigClassifier) {
         bigClassifier->recurDelete();
     }
-//    cout << "After delete big" << endl;
-//    delete pstss;
-//    delete TMO;
-//    cout << "before delete TMO\t" << fun << endl;
-//
-//    cout << "before clear children" << endl;
     children.clear();
-//    cout << "before delete big point" << endl;
     delete bigClassifier;
-//    cout << "finish current deletion" << endl;
-
 }
 #endif
 //#undef DEBUGREDELETE

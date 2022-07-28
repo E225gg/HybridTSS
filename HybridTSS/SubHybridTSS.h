@@ -10,10 +10,12 @@
 
 using namespace std;
 
-
+// action Type
 enum Fun{linear, PSTSS, TM, Hash};
+
 class SubHybridTSS {
 public:
+    // base function
     SubHybridTSS();
     explicit SubHybridTSS(const vector<Rule> &r);
     SubHybridTSS(const vector<Rule> &r, int s, SubHybridTSS* p);
@@ -25,6 +27,7 @@ public:
     Memory MemSizeBytes() const;
     int MemoryAccess() const;
 
+    // Reinforcement learning function
     void addReward(int r);
     vector<vector<int> > getReward();
     uint32_t getRuleSize();
@@ -32,16 +35,18 @@ public:
     int getAction() const;
     vector<Rule> getRules();
 
+    // print
     void printInfo();
 
+    // DEBUG
     void FindRule(const Rule &rule);
     void FindPacket(const Packet &p);
-    void recurDelete();
 
+    // RAII
+    void recurDelete();
 
     int nodeId;
     vector<int> bigOffset;
-
 
 private:
     // Next
@@ -61,7 +66,6 @@ private:
     vector<int> offsetBit; // [0, 32]
 
     // Hash fun
-//    int getRuleKey(const Rule &r, int dim, int offset);
     uint32_t getRulePrefixKey(const Rule &r);
     uint32_t getKey(const Rule &r) const;
     uint32_t getKey(const Packet &p) const;

@@ -1,13 +1,13 @@
-//
-// Created by GIGABYTE on 2022/3/2.
-//
-
 #include "HybridTSS.h"
-//#define DEBUG
 HybridTSS::HybridTSS() {
     binth = 8;
 }
 
+// -----------------------------------------------------------------------------
+// func name: ConstructClassifier
+// description: 先训练模型后构建Classifier
+// To-do: 结构过于冗余，待抽象根据QTable构建Classifier代码
+// -----------------------------------------------------------------------------
 void HybridTSS::ConstructClassifier(const vector<Rule> &rules) {
     train(rules);
     root = new SubHybridTSS(rules);
@@ -24,7 +24,6 @@ void HybridTSS::ConstructClassifier(const vector<Rule> &rules) {
         vector<int> op = getAction(node, 99);
         if (flag) {
             flag = false;
-//            cout << op[0] << "\t" << op[1] << "\t" << op[2] << endl;
         }
         vector<SubHybridTSS*> children = node->ConstructClassifier(op, "build");
         for (auto iter : children) {
@@ -34,40 +33,81 @@ void HybridTSS::ConstructClassifier(const vector<Rule> &rules) {
         }
     }
     vector<vector<int> > reward = root->getReward();
-
-
 }
 
+// -----------------------------------------------------------------------------
+// func name: ClassifyAPacket
+// description: 根据packet查询相应匹配的规则
+// To-do: 
+// -----------------------------------------------------------------------------
 int HybridTSS::ClassifyAPacket(const Packet &packet) {
     return root->ClassifyAPacket(packet);
-//    return 0;
 }
 
+// -----------------------------------------------------------------------------
+// func name: DeleteRule
+// description: 删除相应的规则
+// To-do: 
+// -----------------------------------------------------------------------------
 void HybridTSS::DeleteRule(const Rule &rule) {
     root->DeleteRule(rule);
 }
 
+
+// -----------------------------------------------------------------------------
+// func name: InsertRule
+// description: 插入相应的规则
+// To-do: 
+// -----------------------------------------------------------------------------
 void HybridTSS::InsertRule(const Rule &rule) {
     root->InsertRule(rule);
-
 }
 
+// -----------------------------------------------------------------------------
+// func name: MemSizeBytes
+// description: 计算相应结构整体的Memory
+// To-do: 
+// -----------------------------------------------------------------------------
 Memory HybridTSS::MemSizeBytes() const {
     return root->MemSizeBytes();
 }
 
+// -----------------------------------------------------------------------------
+// func name: MemoryAccess
+// description: 计算访存次数
+// To-do: 父类设计不合理，待修改父类后实现
+// -----------------------------------------------------------------------------
 int HybridTSS::MemoryAccess() const {
     return 0;
 }
 
+// -----------------------------------------------------------------------------
+// func name: NumTables
+// description: 计算Tuple数量
+// To-do: 与本方法无关，不实现
+// -----------------------------------------------------------------------------
 size_t HybridTSS::NumTables() const {
     return 0;
 }
 
+// -----------------------------------------------------------------------------
+// func name: RulesInTable
+// description: 判断第Index条规则在哪个table中
+// To-do: 父类冗余方法，不实现
+// -----------------------------------------------------------------------------
 size_t HybridTSS::RulesInTable(size_t tableIndex) const {
     return 0;
 }
 
+// -----------------------------------------------------------------------------
+// func name: getAction
+// description: 根据当前节点的state获取Action
+// detail: state与action编码方式详见readme, epsilion为最优与探索的标记值，epsilion
+//         越大每次使用最大reward的概率越大，epsilion = 0为仅探索方式，opsilion = 99
+//         为仅访问最优方法，epsilion = 100 为构造baseline方法，不涉及强化学习
+// return: {action类型，维度，所选bit(不计算偏移)}
+// To-do: 方法冗余待优化，编码方式待修改，目的支持单个维度多次选取
+// -----------------------------------------------------------------------------
 vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
     if (!state) {
         cout << "state node exist" << endl;
@@ -89,7 +129,6 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
     }
     int num = rand() % 100;
     if (epsilion == 100) {
-        cout << s << endl;
         // baseline
         if ((s & 1) == 0) {
             return {Hash, 0, 7};
@@ -103,12 +142,15 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
         if ((s & (1 << 15)) == 0) {
             return {Hash, 3, 7};
         }
-        cout << "nodeID:#" << state->nodeId << "\ts:" << s << endl;
         return {TM, -1, -1};
     }
+    
+    // 记录所有action
     vector<vector<int> > Actions;
+    // 记录每个action对应的reward， 结构冗余待优化
     vector<double> rews;
     for (int i = 0; i < 4; i ++) {
+        // 当前维度是否选择过
         if (s & (1 << (5 * i))) {
             continue;
         }
@@ -137,6 +179,7 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
         }
         return op;
     } else {
+        // random explore
         int N = rand() % rews.size();
         return Actions[N];
     }
@@ -145,15 +188,17 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
     return {linear, -1, -1};
 }
 
+// -----------------------------------------------------------------------------
+// func name: ConstructBaseline
+// description: 构造baseline结构
+// To-do: 
+// -----------------------------------------------------------------------------
 void HybridTSS::ConstructBaseline(const vector<Rule> &rules) {
     root = new SubHybridTSS(rules);
     root->nodeId = 0;
     queue<SubHybridTSS*> que;
     que.push(root);
     int nNode = 0;
-#ifdef DEBUG
-    cout << "Base Line function" << endl;
-#endif
     while(!que.empty()) {
         SubHybridTSS *node = que.front();
         if (node) {
@@ -164,35 +209,25 @@ void HybridTSS::ConstructBaseline(const vector<Rule> &rules) {
             continue;
         }
 
-#ifdef DEBUG
-        cout << "before get Action" << endl;
-#endif
         vector<int> op = getAction(node, 100);
-#ifdef DEBUG
-        cout << "Node: #" << node->nodeId << "\top:" << op[0] << "\t" << op[1] << "\t" << op[2] <<"\tnode rules:" << node->getRules().size() << endl;
-#endif
 
         vector<SubHybridTSS*> next = node->ConstructClassifier(op, "build");
-        cout << "op: " << op[0] << " " << op[1] << " " << op[2] << " state:" << node->getState() << endl;
-#ifdef DEBUG
-        cout << "After Construct" <<endl;
-        cout << endl;
-#endif
 
         for (auto iter : next) {
             if (iter) {
                 que.push(iter);
             }
         }
-
-
-
     }
-//    root->printInfo();
     cout << "Construct Finish" << endl;
 
 }
 
+// -----------------------------------------------------------------------------
+// func name: int2str
+// description: int转string，对齐长度至len, 并补充前置0
+// To-do: 冗余函数用to_string重新实现
+// -----------------------------------------------------------------------------
 string int2str(int x, int len) {
     string str = "";
     stack<char> st;
@@ -215,19 +250,24 @@ string int2str(int x, int len) {
 
 }
 
-
+// -----------------------------------------------------------------------------
+// func name: train
+// description: 训练并获得QTable
+// detail: 对于每个节点使用getAction获得下一步策略，直到构建完成，获得每一步的返回值，
+//         对于每一步的State和Action更新Q表
+// To-do: 方法构建HybridTSS方式过于冗余，待优化，训练次数与结束条件待优化
+// -----------------------------------------------------------------------------
 void HybridTSS::train(const vector<Rule> &rules) {
     int stateSize = 1 << 20, actionSize = 1 << 6;
     QTable.resize(stateSize, vector<double>(actionSize, 0.0));
-//    uint32_t loopNum = 10000000 / rules.size();
     uint32_t loopNum = 10000;
     int trainRate = 10;
     for (int i = 0; i < loopNum; i++) {
-//        cout << "next loop" << endl;
         if(i >= loopNum / 10 && i % (loopNum / 10) == 0){
             std::cout<<"Training finish "<<trainRate<<"% ...............Remaining: "<<100 - trainRate<<"%"<<std::endl;
             trainRate += 10;
         }
+        // 构造classifier
         auto *tmpRoot = new SubHybridTSS(rules);
         queue<SubHybridTSS*> que;
         que.push(tmpRoot);
@@ -242,6 +282,8 @@ void HybridTSS::train(const vector<Rule> &rules) {
                 }
             }
         }
+
+        // 获得reward并更新Q表
         vector<vector<int> > reward;
         reward = tmpRoot->getReward();
         for (auto iter : reward) {
@@ -249,7 +291,7 @@ void HybridTSS::train(const vector<Rule> &rules) {
                 continue;
             }
             int s = iter[0], a = iter[1] & ((1 << 6) - 1), r = iter[2];
-            double lr = 0.1;
+            double lr = 0.1; // 改成静态const
             if (QTable[s][a] == 0) {
                 QTable[s][a] = r;
             } else {
@@ -262,6 +304,11 @@ void HybridTSS::train(const vector<Rule> &rules) {
     }
 }
 
+// -----------------------------------------------------------------------------
+// func name: printInfo
+// description: 打印函数信息
+// To-do: 
+// -----------------------------------------------------------------------------
 void HybridTSS::printInfo() {
     root->printInfo();
 }
