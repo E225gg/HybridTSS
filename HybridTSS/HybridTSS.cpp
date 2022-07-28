@@ -124,6 +124,8 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
     for (const Rule &r : nodeRules) {
         tupleKey.insert((r.prefix_length[0] << 6) + r.prefix_length[1]);
     }
+
+    // 存疑，待修正
     if (static_cast<double>(nodeRules.size()) <= rtssleaf * static_cast<double>(tupleKey.size())) {
         return {TM, -1, -1};
     }
