@@ -15,6 +15,8 @@ std::chrono::time_point<std::chrono::steady_clock> Start, End;
 std::chrono::duration<double> elapsed_seconds{};
 std::chrono::duration<double,std::milli> elapsed_milliseconds{};
 vector<int> randUpdate;
+
+
 int nInsert, nDelete;
 //ofstream fout("result.csv", ios::app);
 ofstream fError("ErrorLog.csv", ios::app);
