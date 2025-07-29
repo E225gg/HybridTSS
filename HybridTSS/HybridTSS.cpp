@@ -260,47 +260,83 @@ string int2str(int x, int len) {
 // To-do: 方法构建HybridTSS方式过于冗余，待优化，训练次数与结束条件待优化
 // -----------------------------------------------------------------------------
 void HybridTSS::train(const vector<Rule> &rules) {
-    int stateSize = 1 << 20, actionSize = 1 << 6;
+    const int stateSize = 1 << 20;
+    const int actionSize = 1 << 6;
+    const double learnRate = 0.1;
+    const int maxLoop = 10000;
+    const int reportInterval = maxLoop / 10;
+
     QTable.resize(stateSize, vector<double>(actionSize, 0.0));
-    uint32_t loopNum = 10000;
+
+    // 收斂判斷參數
+    const int windowSize = 20;            // 記錄最近 20 次 reward 平均
+    const double stopThreshold = 0.01;    // 若 reward 平均變化低於此值 → 收斂
+    vector<double> recentRewards;
+
     int trainRate = 10;
-    for (int i = 0; i < loopNum; i++) {
-        if(i >= loopNum / 10 && i % (loopNum / 10) == 0){
-            std::cout<<"Training finish "<<trainRate<<"% ...............Remaining: "<<100 - trainRate<<"%"<<std::endl;
+
+    for (int i = 0; i < maxLoop; i++) {
+        if (i >= reportInterval && i % reportInterval == 0) {
+            std::cout << "Training finish " << trainRate << "% ...............Remaining: " 
+                      << 100 - trainRate << "%" << std::endl;
             trainRate += 10;
         }
-        // 构造classifier
-        auto *tmpRoot = new SubHybridTSS(rules);
+
+        // 1. 建立臨時決策樹
+        auto* tmpRoot = new SubHybridTSS(rules);
         queue<SubHybridTSS*> que;
         que.push(tmpRoot);
+
         while (!que.empty()) {
-            SubHybridTSS* node = que.front();
-            que.pop();
+            SubHybridTSS* node = que.front(); que.pop();
             vector<int> op = getAction(node, 50);
             vector<SubHybridTSS*> children = node->ConstructClassifier(op, "train");
             for (auto iter : children) {
-                if (iter) {
-                    que.push(iter);
-                }
+                if (iter) que.push(iter);
             }
         }
 
-        // 获得reward并更新Q表
-        vector<vector<int> > reward;
-        reward = tmpRoot->getReward();
-        for (auto iter : reward) {
-            if ((iter[1] >> 6) != 3) {
-                continue;
-            }
-            int s = iter[0], a = iter[1] & ((1 << 6) - 1), r = iter[2];
-            double lr = 0.1; // 改成静态const
+        // 2. 取得 reward 並更新 QTable
+        vector<vector<int>> reward = tmpRoot->getReward();
+        double avgReward = 0.0;
+        int count = 0;
+
+        for (auto& iter : reward) {
+            if ((iter[1] >> 6) != 3) continue;
+            int s = iter[0];
+            int a = iter[1] & ((1 << 6) - 1);
+            int r = iter[2];
             if (QTable[s][a] == 0) {
                 QTable[s][a] = r;
             } else {
-                QTable[s][a] += lr * (r - QTable[s][a]);
+                QTable[s][a] += learnRate * (r - QTable[s][a]);
+            }
+            avgReward += r;
+            count++;
+        }
+
+        if (count > 0) avgReward /= count;
+
+        // 3. 滑動平均收斂檢查
+        recentRewards.push_back(avgReward);
+        if (recentRewards.size() > windowSize) recentRewards.erase(recentRewards.begin());
+
+        if (recentRewards.size() == windowSize) {
+            double delta = 0.0;
+            for (size_t j = 1; j < recentRewards.size(); j++) {
+                delta += std::abs(recentRewards[j] - recentRewards[j - 1]);
+            }
+            delta /= (windowSize - 1);
+            if (delta < stopThreshold) {
+                std::cout << "[訓練提早停止] 已收斂於第 " << i << " 回合，平均 reward 變化量 Δ = " 
+                          << delta << std::endl;
+                tmpRoot->recurDelete();
+                delete tmpRoot;
+                break;
             }
         }
-        int act = reward[0][1] & ((1 << 6) - 1);
+
+        // 4. 資源回收
         tmpRoot->recurDelete();
         delete tmpRoot;
     }
