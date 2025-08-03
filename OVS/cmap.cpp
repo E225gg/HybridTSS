@@ -360,7 +360,7 @@ struct cmap_impl {
     /* Padding to make cmap_impl exactly one cache line long. */
     uint8_t pad[CACHE_LINE_SIZE - sizeof(unsigned int) * 5];
 
-    struct cmap_bucket  buckets[];
+    struct cmap_bucket  buckets[1];  /* Variable length array allocated at runtime */
 };
 
 

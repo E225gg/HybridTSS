@@ -1,4 +1,5 @@
 #include "HybridTSS.h"
+#include <unordered_map>  // std::unordered_map
 HybridTSS::HybridTSS() {
     binth = 8;
 }
@@ -260,50 +261,86 @@ string int2str(int x, int len) {
 // To-do: 方法构建HybridTSS方式过于冗余，待优化，训练次数与结束条件待优化
 // -----------------------------------------------------------------------------
 void HybridTSS::train(const vector<Rule> &rules) {
-    int stateSize = 1 << 20, actionSize = 1 << 6;
+    int stateSize  = 1 << 20, actionSize = 1 << 6;
     QTable.resize(stateSize, vector<double>(actionSize, 0.0));
     uint32_t loopNum = 10000;
-    int trainRate = 10;
-    for (int i = 0; i < loopNum; i++) {
-        if(i >= loopNum / 10 && i % (loopNum / 10) == 0){
-            std::cout<<"Training finish "<<trainRate<<"% ...............Remaining: "<<100 - trainRate<<"%"<<std::endl;
-            trainRate += 10;
+    for (uint32_t i = 0; i < loopNum; i++) {
+        // 每 10% 顯示進度
+        if (i > 0 && i % (loopNum/10) == 0) {
+            std::cout << "Training " << (i*100/loopNum) << "%\n";
         }
-        // 构造classifier
+
+        // 1. 建立單次回合的 Classifier
         auto *tmpRoot = new SubHybridTSS(rules);
         queue<SubHybridTSS*> que;
         que.push(tmpRoot);
         while (!que.empty()) {
-            SubHybridTSS* node = que.front();
-            que.pop();
-            vector<int> op = getAction(node, 50);
-            vector<SubHybridTSS*> children = node->ConstructClassifier(op, "train");
-            for (auto iter : children) {
-                if (iter) {
-                    que.push(iter);
-                }
+            SubHybridTSS* node = que.front(); que.pop();
+            auto op = getAction(node, 50);
+            auto children = node->ConstructClassifier(op, "train");
+            for (auto c : children) if (c) que.push(c);
+        }
+
+        // 2. 收集本回合所有經驗 (state, action, reward)
+        auto rewardVec = tmpRoot->getReward();
+        for (auto &iter : rewardVec) {
+            // 篩選只對第 3 類動作做更新 ((iter[1] >> 6) == 3)
+            if ((iter[1] >> 6) != 3) continue;
+            int s = iter[0];
+            int a = iter[1] & ((1 << 6) - 1);
+            int r = iter[2];
+
+            // 暫存至 batchBuf，不立即更新 QTable
+            batchBuf.push_back({s, a, r});
+
+            // 若達到 batchSize，執行一次 batch update
+            if (batchBuf.size() >= batchSize) {
+                updateBatch();
             }
         }
 
-        // 获得reward并更新Q表
-        vector<vector<int> > reward;
-        reward = tmpRoot->getReward();
-        for (auto iter : reward) {
-            if ((iter[1] >> 6) != 3) {
-                continue;
-            }
-            int s = iter[0], a = iter[1] & ((1 << 6) - 1), r = iter[2];
-            double lr = 0.1; // 改成静态const
-            if (QTable[s][a] == 0) {
-                QTable[s][a] = r;
-            } else {
-                QTable[s][a] += lr * (r - QTable[s][a]);
-            }
+        // 3. 回合結束前，若有剩餘不足一批的經驗，也強制更新
+        if (!batchBuf.empty()) {
+            updateBatch();
         }
-        int act = reward[0][1] & ((1 << 6) - 1);
+
+        // 4. 釋放本回合結構
         tmpRoot->recurDelete();
         delete tmpRoot;
     }
+}
+
+// -----------------------------------------------------------------------------
+// func name: updateBatch
+// description: 將 batchBuf 中累積的經驗，依 state+action 分組後批次更新 QTable
+// -----------------------------------------------------------------------------
+void HybridTSS::updateBatch() {
+    // 用 unordered_map 累加同一 (s,a) 的總獎勵與計數
+    unordered_map<uint32_t, pair<double,int>> acc;
+    for (auto &e : batchBuf) {
+        uint32_t key = (static_cast<uint32_t>(e.s) << 6)
+                     | static_cast<uint32_t>(e.a);
+        acc[key].first  += e.r;   // 獎勵總和
+        acc[key].second += 1;     // 樣本數
+    }
+
+    // 對每組 (s,a) 計算平均獎勵，並更新 QTable
+    for (auto &kv : acc) {
+        uint32_t key = kv.first;
+        int s = static_cast<int>( key >> 6 );
+        int a = static_cast<int>( key & ((1 << 6) - 1) );
+        double r_avg = kv.second.first / kv.second.second;
+
+        // 初次更新則直接設為平均獎勵，否則做 TD 更新
+        if (QTable[s][a] == 0.0) {
+            QTable[s][a] = r_avg;
+        } else {
+            QTable[s][a] += learnRate * (r_avg - QTable[s][a]);
+        }
+    }
+
+    // 清空暫存，準備下一批
+    batchBuf.clear();
 }
 
 // -----------------------------------------------------------------------------
