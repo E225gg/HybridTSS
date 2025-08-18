@@ -1,4 +1,5 @@
 #include "HybridTSS.h"
+#include <omp.h>  // 使用 OpenMP 多線程
 HybridTSS::HybridTSS() {
     binth = 8;
 }
@@ -108,54 +109,87 @@ size_t HybridTSS::RulesInTable(size_t tableIndex) const {
 // return: {action类型，维度，所选bit(不计算偏移)}
 // To-do: 方法冗余待优化，编码方式待修改，目的支持单个维度多次选取
 // -----------------------------------------------------------------------------
-vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion) {
+vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
+    if (!state) {
+        cout << "state node exist" << endl;
+        exit(-1);
+    }
+    
+    // Greedy for linear, TM,
     int s = state->getState();
     vector<Rule> nodeRules = state->getRules();
-
-    // 直接使用原本基準
-    if (nodeRules.size() < binth) return {linear, -1, -1};
+    if (nodeRules.size() < binth) {
+        return {linear, -1, -1};
+    }
     set<uint32_t> tupleKey;
-    for (const Rule &r : nodeRules) tupleKey.insert((r.prefix_length[0]<<6)+r.prefix_length[1]);
-    if (static_cast<double>(nodeRules.size()) <= rtssleaf*tupleKey.size()) return {TM, -1, -1};
-
-    // 準備可選 actions
-    vector<vector<int>> Actions;
-    vector<double> rews;
-
-    for (int i = 0; i < 4; i++) {
-        if (s & (1 << (5*i))) continue;
-        for (int j = 0; j < 16; j++) {
-            if ((i==2 || i==3) && j>7) continue;
-            Actions.push_back({Hash, i, j});
-            int act = (i<<4)|j;
-            double r = 0;
-            if (QTableSparse.find(s) != QTableSparse.end()) {
-                r = QTableSparse[s][act];
-            }
-            rews.push_back(r);
-        }
+    for (const Rule &r : nodeRules) {
+        tupleKey.insert((r.prefix_length[0] << 6) + r.prefix_length[1]);
     }
 
-    if (Actions.empty()) return {TM, -1, -1};
-
+    // 存疑，待修正
+    if (static_cast<double>(nodeRules.size()) <= rtssleaf * static_cast<double>(tupleKey.size())) {
+        return {TM, -1, -1};
+    }
     int num = rand() % 100;
+    if (epsilion == 100) {
+        // baseline
+        if ((s & 1) == 0) {
+            return {Hash, 0, 7};
+        }
+        if ((s & (1 << 5)) == 0) {
+            return {Hash, 1, 8};
+        }
+        if ((s & (1 << 10)) == 0) {
+            return {Hash, 2, 7};
+        }
+        if ((s & (1 << 15)) == 0) {
+            return {Hash, 3, 7};
+        }
+        return {TM, -1, -1};
+    }
+    
+    // 记录所有action
+    vector<vector<int> > Actions;
+    // 记录每个action对应的reward， 结构冗余待优化
+    vector<double> rews;
+    for (int i = 0; i < 4; i ++) {
+        // 当前维度是否选择过
+        if (s & (1 << (5 * i))) {
+            continue;
+        }
+        for (int j = 0; j < 16; j++) {
+            if ((i == 2 || i == 3) && j > 7) {
+                continue;
+            }
+            Actions.push_back({Hash, i, j});
+            int act = (i << 4) | j;
+            rews.push_back(QTable[s][act]);
+        }
+    }
+    if (rews.empty()) {
+        return {TM, -1, -1};
+    }
     if (num <= epsilion) {
-        // E-greedy 選擇最大 reward
-        int idx = 0;
-        double maxR = rews[0];
-        for (int i = 1; i < rews.size(); i++) {
-            if (rews[i] > maxR) {
-                maxR = rews[i];
-                idx = i;
+        // E-greedy
+        vector<int> op;
+        double maxReward = rews[0];
+        op = Actions[0];
+        for (int i = 0; i < rews.size(); i++) {
+            if (rews[i] > maxReward) {
+                maxReward = rews[i];
+                op = Actions[i];
             }
         }
-        return Actions[idx];
+        return op;
     } else {
-        int idx = rand() % Actions.size();
-        return Actions[idx];
+        // random explore
+        int N = rand() % rews.size();
+        return Actions[N];
     }
-}
 
+
+    return {linear, -1, -1};
+}
 
 // -----------------------------------------------------------------------------
 // func name: ConstructBaseline
@@ -227,21 +261,41 @@ string int2str(int x, int len) {
 // To-do: 方法构建HybridTSS方式过于冗余，待优化，训练次数与结束条件待优化
 // -----------------------------------------------------------------------------
 void HybridTSS::train(const vector<Rule> &rules) {
-    uint32_t loopNum = 10000;
+    cout << "Starting parallel training with " << omp_get_max_threads() << " threads..." << endl;
+    
+    int stateSize = 1 << 20, actionSize = 1 << 6;
+    QTable.resize(stateSize, vector<double>(actionSize, 0.0));
+    
+    // 減少訓練次數以測試並行效果
+    uint32_t loopNum = 1000;  // 從 10000 減少到 1000
     int trainRate = 10;
-    double lr = 0.1;
-
+    
+    // 為每個線程準備獨立的隨機數種子
+    #pragma omp parallel
+    {
+        int thread_id = omp_get_thread_num();
+        srand(time(NULL) + thread_id);
+    }
+    
+    // **關鍵並行化：並行執行訓練迴圈**
+    #pragma omp parallel for schedule(dynamic, 10) shared(trainRate)
     for (int i = 0; i < loopNum; i++) {
-        if(i >= loopNum / 10 && i % (loopNum / 10) == 0){
-            std::cout<<"Training finish "<<trainRate<<"% ...............Remaining: "<<100 - trainRate<<"%"<<std::endl;
-            trainRate += 10;
+        
+        // 線程安全的進度顯示
+        if (i >= loopNum / 10 && i % (loopNum / 10) == 0) {
+            #pragma omp critical
+            {
+                std::cout << "Training finish " << trainRate << "% ...............Remaining: " 
+                         << 100 - trainRate << "%" << std::endl;
+                trainRate += 10;
+            }
         }
-
+        
+        // 每個線程獨立建構 classifier
         auto *tmpRoot = new SubHybridTSS(rules);
         queue<SubHybridTSS*> que;
         que.push(tmpRoot);
-
-        // 生成 reward
+        
         while (!que.empty()) {
             SubHybridTSS* node = que.front();
             que.pop();
@@ -254,27 +308,33 @@ void HybridTSS::train(const vector<Rule> &rules) {
             }
         }
 
-        // 收集 reward
-        vector<vector<int>> reward = tmpRoot->getReward();
-        for (auto &iter : reward) {
-            if ((iter[1] >> 6) != 3) continue; // 只更新 Hash
-            batch.push_back({iter[0], iter[1] & ((1<<6)-1), static_cast<double>(iter[2])});
-        }
-
-        // 批次更新 QTableSparse
-        for (auto &entry : batch) {
-            if (QTableSparse.find(entry.state) == QTableSparse.end()) {
-                QTableSparse[entry.state] = vector<double>(actionSize, 0.0);
+        // 獲得 reward
+        vector<vector<int> > reward = tmpRoot->getReward();
+        
+        // **關鍵：線程安全的 Q 表更新**
+        #pragma omp critical(qtable_update)
+        {
+            for (auto iter : reward) {
+                if ((iter[1] >> 6) != 3) {
+                    continue;
+                }
+                int s = iter[0], a = iter[1] & ((1 << 6) - 1), r = iter[2];
+                double lr = 0.1;
+                if (QTable[s][a] == 0) {
+                    QTable[s][a] = r;
+                } else {
+                    QTable[s][a] += lr * (r - QTable[s][a]);
+                }
             }
-            QTableSparse[entry.state][entry.action] += lr * (entry.reward - QTableSparse[entry.state][entry.action]);
         }
-        batch.clear();
-
+        
+        // 清理記憶體
         tmpRoot->recurDelete();
         delete tmpRoot;
     }
+    
+    cout << "Parallel training completed!" << endl;
 }
-
 
 // -----------------------------------------------------------------------------
 // func name: printInfo
