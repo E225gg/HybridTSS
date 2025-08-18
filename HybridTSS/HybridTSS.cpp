@@ -108,87 +108,54 @@ size_t HybridTSS::RulesInTable(size_t tableIndex) const {
 // return: {action类型，维度，所选bit(不计算偏移)}
 // To-do: 方法冗余待优化，编码方式待修改，目的支持单个维度多次选取
 // -----------------------------------------------------------------------------
-vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
-    if (!state) {
-        cout << "state node exist" << endl;
-        exit(-1);
-    }
-    
-    // Greedy for linear, TM,
+vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion) {
     int s = state->getState();
     vector<Rule> nodeRules = state->getRules();
-    if (nodeRules.size() < binth) {
-        return {linear, -1, -1};
-    }
+
+    // 直接使用原本基準
+    if (nodeRules.size() < binth) return {linear, -1, -1};
     set<uint32_t> tupleKey;
-    for (const Rule &r : nodeRules) {
-        tupleKey.insert((r.prefix_length[0] << 6) + r.prefix_length[1]);
-    }
+    for (const Rule &r : nodeRules) tupleKey.insert((r.prefix_length[0]<<6)+r.prefix_length[1]);
+    if (static_cast<double>(nodeRules.size()) <= rtssleaf*tupleKey.size()) return {TM, -1, -1};
 
-    // 存疑，待修正
-    if (static_cast<double>(nodeRules.size()) <= rtssleaf * static_cast<double>(tupleKey.size())) {
-        return {TM, -1, -1};
-    }
-    int num = rand() % 100;
-    if (epsilion == 100) {
-        // baseline
-        if ((s & 1) == 0) {
-            return {Hash, 0, 7};
-        }
-        if ((s & (1 << 5)) == 0) {
-            return {Hash, 1, 8};
-        }
-        if ((s & (1 << 10)) == 0) {
-            return {Hash, 2, 7};
-        }
-        if ((s & (1 << 15)) == 0) {
-            return {Hash, 3, 7};
-        }
-        return {TM, -1, -1};
-    }
-    
-    // 记录所有action
-    vector<vector<int> > Actions;
-    // 记录每个action对应的reward， 结构冗余待优化
+    // 準備可選 actions
+    vector<vector<int>> Actions;
     vector<double> rews;
-    for (int i = 0; i < 4; i ++) {
-        // 当前维度是否选择过
-        if (s & (1 << (5 * i))) {
-            continue;
-        }
+
+    for (int i = 0; i < 4; i++) {
+        if (s & (1 << (5*i))) continue;
         for (int j = 0; j < 16; j++) {
-            if ((i == 2 || i == 3) && j > 7) {
-                continue;
-            }
+            if ((i==2 || i==3) && j>7) continue;
             Actions.push_back({Hash, i, j});
-            int act = (i << 4) | j;
-            rews.push_back(QTable[s][act]);
+            int act = (i<<4)|j;
+            double r = 0;
+            if (QTableSparse.find(s) != QTableSparse.end()) {
+                r = QTableSparse[s][act];
+            }
+            rews.push_back(r);
         }
     }
-    if (rews.empty()) {
-        return {TM, -1, -1};
-    }
+
+    if (Actions.empty()) return {TM, -1, -1};
+
+    int num = rand() % 100;
     if (num <= epsilion) {
-        // E-greedy
-        vector<int> op;
-        double maxReward = rews[0];
-        op = Actions[0];
-        for (int i = 0; i < rews.size(); i++) {
-            if (rews[i] > maxReward) {
-                maxReward = rews[i];
-                op = Actions[i];
+        // E-greedy 選擇最大 reward
+        int idx = 0;
+        double maxR = rews[0];
+        for (int i = 1; i < rews.size(); i++) {
+            if (rews[i] > maxR) {
+                maxR = rews[i];
+                idx = i;
             }
         }
-        return op;
+        return Actions[idx];
     } else {
-        // random explore
-        int N = rand() % rews.size();
-        return Actions[N];
+        int idx = rand() % Actions.size();
+        return Actions[idx];
     }
-
-
-    return {linear, -1, -1};
 }
+
 
 // -----------------------------------------------------------------------------
 // func name: ConstructBaseline
@@ -260,19 +227,21 @@ string int2str(int x, int len) {
 // To-do: 方法构建HybridTSS方式过于冗余，待优化，训练次数与结束条件待优化
 // -----------------------------------------------------------------------------
 void HybridTSS::train(const vector<Rule> &rules) {
-    int stateSize = 1 << 20, actionSize = 1 << 6;
-    QTable.resize(stateSize, vector<double>(actionSize, 0.0));
     uint32_t loopNum = 10000;
     int trainRate = 10;
+    double lr = 0.1;
+
     for (int i = 0; i < loopNum; i++) {
         if(i >= loopNum / 10 && i % (loopNum / 10) == 0){
             std::cout<<"Training finish "<<trainRate<<"% ...............Remaining: "<<100 - trainRate<<"%"<<std::endl;
             trainRate += 10;
         }
-        // 构造classifier
+
         auto *tmpRoot = new SubHybridTSS(rules);
         queue<SubHybridTSS*> que;
         que.push(tmpRoot);
+
+        // 生成 reward
         while (!que.empty()) {
             SubHybridTSS* node = que.front();
             que.pop();
@@ -285,26 +254,27 @@ void HybridTSS::train(const vector<Rule> &rules) {
             }
         }
 
-        // 获得reward并更新Q表
-        vector<vector<int> > reward;
-        reward = tmpRoot->getReward();
-        for (auto iter : reward) {
-            if ((iter[1] >> 6) != 3) {
-                continue;
-            }
-            int s = iter[0], a = iter[1] & ((1 << 6) - 1), r = iter[2];
-            double lr = 0.1; // 改成静态const
-            if (QTable[s][a] == 0) {
-                QTable[s][a] = r;
-            } else {
-                QTable[s][a] += lr * (r - QTable[s][a]);
-            }
+        // 收集 reward
+        vector<vector<int>> reward = tmpRoot->getReward();
+        for (auto &iter : reward) {
+            if ((iter[1] >> 6) != 3) continue; // 只更新 Hash
+            batch.push_back({iter[0], iter[1] & ((1<<6)-1), static_cast<double>(iter[2])});
         }
-        int act = reward[0][1] & ((1 << 6) - 1);
+
+        // 批次更新 QTableSparse
+        for (auto &entry : batch) {
+            if (QTableSparse.find(entry.state) == QTableSparse.end()) {
+                QTableSparse[entry.state] = vector<double>(actionSize, 0.0);
+            }
+            QTableSparse[entry.state][entry.action] += lr * (entry.reward - QTableSparse[entry.state][entry.action]);
+        }
+        batch.clear();
+
         tmpRoot->recurDelete();
         delete tmpRoot;
     }
 }
+
 
 // -----------------------------------------------------------------------------
 // func name: printInfo

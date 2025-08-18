@@ -1,6 +1,7 @@
 #ifndef HYBRIDTSSV1_2_HYBRIDTSS_H
 #define HYBRIDTSSV1_2_HYBRIDTSS_H
 #include "SubHybridTSS.h"
+#include <unordered_map>  // Spare QTable
 using namespace std;
 class HybridTSS : public PacketClassifier {
 public:
@@ -33,7 +34,16 @@ private:
     int binth = 8;
     SubHybridTSS *root;
     double rtssleaf = 1.5;
-    vector<vector<double> > QTable;
+
+    // Spare QTable
+    struct QBatch {
+        int state;
+        int action;
+        double reward;
+    };
+    unordered_map<int, vector<double>> QTableSparse;
+    vector<QBatch> batch;
+    int actionSize = 1 << 6;  // 64 actions
 
     void train(const vector<Rule> &rules);
 };
