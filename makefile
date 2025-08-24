@@ -4,7 +4,9 @@ TMPATH = TupleMerge/
 CTPATH = CutTSS/
 
 CXX = g++
+# CXXFLAGS = -g -std=c++14 -pedantic -fpermissive -O3
 CXXFLAGS = -g -std=c++14 -pedantic -fpermissive -fopenmp -O3
+LDFLAGS = -fopenmp
 
 
 # Targets needed to bring the executable up to date

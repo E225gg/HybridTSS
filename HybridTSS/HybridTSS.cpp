@@ -1,4 +1,5 @@
 #include "HybridTSS.h"
+#include <omp.h>  // 使用 OpenMP 多線程
 HybridTSS::HybridTSS() {
     binth = 8;
 }
@@ -260,19 +261,41 @@ string int2str(int x, int len) {
 // To-do: 方法构建HybridTSS方式过于冗余，待优化，训练次数与结束条件待优化
 // -----------------------------------------------------------------------------
 void HybridTSS::train(const vector<Rule> &rules) {
+    cout << "Starting parallel training with " << omp_get_max_threads() << " threads..." << endl;
+    
     int stateSize = 1 << 20, actionSize = 1 << 6;
     QTable.resize(stateSize, vector<double>(actionSize, 0.0));
-    uint32_t loopNum = 10000;
+    
+    // 減少訓練次數以測試並行效果
+    uint32_t loopNum = 1000;  // 從 10000 減少到 1000
     int trainRate = 10;
+    
+    // 為每個線程準備獨立的隨機數種子
+    #pragma omp parallel
+    {
+        int thread_id = omp_get_thread_num();
+        srand(time(NULL) + thread_id);
+    }
+    
+    // **關鍵並行化：並行執行訓練迴圈**
+    #pragma omp parallel for schedule(dynamic, 10) shared(trainRate)
     for (int i = 0; i < loopNum; i++) {
-        if(i >= loopNum / 10 && i % (loopNum / 10) == 0){
-            std::cout<<"Training finish "<<trainRate<<"% ...............Remaining: "<<100 - trainRate<<"%"<<std::endl;
-            trainRate += 10;
+        
+        // 線程安全的進度顯示
+        if (i >= loopNum / 10 && i % (loopNum / 10) == 0) {
+            #pragma omp critical
+            {
+                std::cout << "Training finish " << trainRate << "% ...............Remaining: " 
+                         << 100 - trainRate << "%" << std::endl;
+                trainRate += 10;
+            }
         }
-        // 构造classifier
+        
+        // 每個線程獨立建構 classifier
         auto *tmpRoot = new SubHybridTSS(rules);
         queue<SubHybridTSS*> que;
         que.push(tmpRoot);
+        
         while (!que.empty()) {
             SubHybridTSS* node = que.front();
             que.pop();
@@ -285,25 +308,32 @@ void HybridTSS::train(const vector<Rule> &rules) {
             }
         }
 
-        // 获得reward并更新Q表
-        vector<vector<int> > reward;
-        reward = tmpRoot->getReward();
-        for (auto iter : reward) {
-            if ((iter[1] >> 6) != 3) {
-                continue;
-            }
-            int s = iter[0], a = iter[1] & ((1 << 6) - 1), r = iter[2];
-            double lr = 0.1; // 改成静态const
-            if (QTable[s][a] == 0) {
-                QTable[s][a] = r;
-            } else {
-                QTable[s][a] += lr * (r - QTable[s][a]);
+        // 獲得 reward
+        vector<vector<int> > reward = tmpRoot->getReward();
+        
+        // **關鍵：線程安全的 Q 表更新**
+        #pragma omp critical(qtable_update)
+        {
+            for (auto iter : reward) {
+                if ((iter[1] >> 6) != 3) {
+                    continue;
+                }
+                int s = iter[0], a = iter[1] & ((1 << 6) - 1), r = iter[2];
+                double lr = 0.1;
+                if (QTable[s][a] == 0) {
+                    QTable[s][a] = r;
+                } else {
+                    QTable[s][a] += lr * (r - QTable[s][a]);
+                }
             }
         }
-        int act = reward[0][1] & ((1 << 6) - 1);
+        
+        // 清理記憶體
         tmpRoot->recurDelete();
         delete tmpRoot;
     }
+    
+    cout << "Parallel training completed!" << endl;
 }
 
 // -----------------------------------------------------------------------------
