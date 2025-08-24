@@ -1,5 +1,5 @@
 #include "HybridTSS.h"
-#include <unordered_map>  // std::unordered_map
+#include <omp.h>  // 使用 OpenMP 多線程
 HybridTSS::HybridTSS() {
     binth = 8;
 }
@@ -126,10 +126,16 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
         tupleKey.insert((r.prefix_length[0] << 6) + r.prefix_length[1]);
     }
 
-    // 存疑，待修正
-    if (static_cast<double>(nodeRules.size()) <= rtssleaf * static_cast<double>(tupleKey.size())) {
+    // 取 QTable 之前，先檢查 s 與每列長度
+    if (s < 0 || s >= static_cast<int>(QTable.size())) {
+        // 回退策略：用 TM(TupleMerge) 或 linear
         return {TM, -1, -1};
     }
+    const auto& row = QTable[s];
+    if (row.size() < 64) { // 期望動作數(action size)為 64
+        return {TM, -1, -1};
+    }
+
     int num = rand() % 100;
     if (epsilion == 100) {
         // baseline
@@ -149,26 +155,26 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
     }
     
     // 记录所有action
-    vector<vector<int> > Actions;
-    // 记录每个action对应的reward， 结构冗余待优化
+    vector<vector<int>> Actions;
+    // 记录每个action对应的reward
     vector<double> rews;
-    for (int i = 0; i < 4; i ++) {
+    static constexpr int BITS[4] = {16, 16, 8, 8};
+
+    for (int i = 0; i < 4; ++i) {
         // 当前维度是否选择过
-        if (s & (1 << (5 * i))) {
-            continue;
-        }
-        for (int j = 0; j < 16; j++) {
-            if ((i == 2 || i == 3) && j > 7) {
-                continue;
-            }
+        if (s & (1 << (5 * i))) continue;
+
+        for (int j = 0; j < BITS[i]; ++j) {
             Actions.push_back({Hash, i, j});
-            int act = (i << 4) | j;
-            rews.push_back(QTable[s][act]);
+            const int act = (i << 4) | j; // i∈[0,3], j∈[0,BITS[i])-1 -> act∈[0,63]
+            rews.push_back(row[act]);
         }
     }
+
     if (rews.empty()) {
         return {TM, -1, -1};
     }
+
     if (num <= epsilion) {
         // E-greedy
         vector<int> op;
@@ -261,86 +267,80 @@ string int2str(int x, int len) {
 // To-do: 方法构建HybridTSS方式过于冗余，待优化，训练次数与结束条件待优化
 // -----------------------------------------------------------------------------
 void HybridTSS::train(const vector<Rule> &rules) {
-    int stateSize  = 1 << 20, actionSize = 1 << 6;
-    QTable.resize(stateSize, vector<double>(actionSize, 0.0));
-    uint32_t loopNum = 10000;
-    for (uint32_t i = 0; i < loopNum; i++) {
-        // 每 10% 顯示進度
-        if (i > 0 && i % (loopNum/10) == 0) {
-            std::cout << "Training " << (i*100/loopNum) << "%\n";
-        }
+    cout << "Starting parallel training with " << omp_get_max_threads() << " threads..." << endl;
+    
+    const int STATE_SIZE = 1 << 20;
+    const int ACTION_SIZE = 64;
+    QTable.assign(STATE_SIZE, std::vector<double>(ACTION_SIZE, 0.0));
 
-        // 1. 建立單次回合的 Classifier
+    // 減少訓練次數以測試並行效果
+    uint32_t loopNum = 1000;  // 從 10000 減少到 1000
+    int trainRate = 10;
+    
+    // 為每個線程準備獨立的隨機數種子
+    #pragma omp parallel
+    {
+        int thread_id = omp_get_thread_num();
+        srand(time(NULL) + thread_id);
+    }
+    
+    // **關鍵並行化：並行執行訓練迴圈**
+    #pragma omp parallel for schedule(dynamic, 10) shared(trainRate)
+    for (int i = 0; i < loopNum; i++) {
+        
+        // 線程安全的進度顯示
+        if (i >= loopNum / 10 && i % (loopNum / 10) == 0) {
+            #pragma omp critical
+            {
+                std::cout << "Training finish " << trainRate << "% ...............Remaining: " 
+                         << 100 - trainRate << "%" << std::endl;
+                trainRate += 10;
+            }
+        }
+        
+        // 每個線程獨立建構 classifier
         auto *tmpRoot = new SubHybridTSS(rules);
         queue<SubHybridTSS*> que;
         que.push(tmpRoot);
+        
         while (!que.empty()) {
-            SubHybridTSS* node = que.front(); que.pop();
-            auto op = getAction(node, 50);
-            auto children = node->ConstructClassifier(op, "train");
-            for (auto c : children) if (c) que.push(c);
-        }
-
-        // 2. 收集本回合所有經驗 (state, action, reward)
-        auto rewardVec = tmpRoot->getReward();
-        for (auto &iter : rewardVec) {
-            // 篩選只對第 3 類動作做更新 ((iter[1] >> 6) == 3)
-            if ((iter[1] >> 6) != 3) continue;
-            int s = iter[0];
-            int a = iter[1] & ((1 << 6) - 1);
-            int r = iter[2];
-
-            // 暫存至 batchBuf，不立即更新 QTable
-            batchBuf.push_back({s, a, r});
-
-            // 若達到 batchSize，執行一次 batch update
-            if (batchBuf.size() >= batchSize) {
-                updateBatch();
+            SubHybridTSS* node = que.front();
+            que.pop();
+            vector<int> op = getAction(node, 50);
+            vector<SubHybridTSS*> children = node->ConstructClassifier(op, "train");
+            for (auto iter : children) {
+                if (iter) {
+                    que.push(iter);
+                }
             }
         }
 
-        // 3. 回合結束前，若有剩餘不足一批的經驗，也強制更新
-        if (!batchBuf.empty()) {
-            updateBatch();
+        // 獲得 reward
+        vector<vector<int> > reward = tmpRoot->getReward();
+        
+        // **關鍵：線程安全的 Q 表更新**
+        #pragma omp critical(qtable_update)
+        {
+            for (auto iter : reward) {
+                if ((iter[1] >> 6) != 3) {
+                    continue;
+                }
+                int s = iter[0], a = iter[1] & ((1 << 6) - 1), r = iter[2];
+                double lr = 0.1;
+                if (QTable[s][a] == 0) {
+                    QTable[s][a] = r;
+                } else {
+                    QTable[s][a] += lr * (r - QTable[s][a]);
+                }
+            }
         }
-
-        // 4. 釋放本回合結構
+        
+        // 清理記憶體
         tmpRoot->recurDelete();
         delete tmpRoot;
     }
-}
-
-// -----------------------------------------------------------------------------
-// func name: updateBatch
-// description: 將 batchBuf 中累積的經驗，依 state+action 分組後批次更新 QTable
-// -----------------------------------------------------------------------------
-void HybridTSS::updateBatch() {
-    // 用 unordered_map 累加同一 (s,a) 的總獎勵與計數
-    unordered_map<uint32_t, pair<double,int>> acc;
-    for (auto &e : batchBuf) {
-        uint32_t key = (static_cast<uint32_t>(e.s) << 6)
-                     | static_cast<uint32_t>(e.a);
-        acc[key].first  += e.r;   // 獎勵總和
-        acc[key].second += 1;     // 樣本數
-    }
-
-    // 對每組 (s,a) 計算平均獎勵，並更新 QTable
-    for (auto &kv : acc) {
-        uint32_t key = kv.first;
-        int s = static_cast<int>( key >> 6 );
-        int a = static_cast<int>( key & ((1 << 6) - 1) );
-        double r_avg = kv.second.first / kv.second.second;
-
-        // 初次更新則直接設為平均獎勵，否則做 TD 更新
-        if (QTable[s][a] == 0.0) {
-            QTable[s][a] = r_avg;
-        } else {
-            QTable[s][a] += learnRate * (r_avg - QTable[s][a]);
-        }
-    }
-
-    // 清空暫存，準備下一批
-    batchBuf.clear();
+    
+    cout << "Parallel training completed!" << endl;
 }
 
 // -----------------------------------------------------------------------------

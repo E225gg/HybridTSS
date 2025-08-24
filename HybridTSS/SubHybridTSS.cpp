@@ -40,6 +40,8 @@ SubHybridTSS::SubHybridTSS(const vector<Rule> &r, int s, SubHybridTSS* p) {
     par = p;
 }
 
+
+
 // -----------------------------------------------------------------------------
 // func name: ConstructClassifier
 // description: 按照op指定的方式构造，并返回孩子节点，其中Hash是通过先解析action,
@@ -266,6 +268,7 @@ void SubHybridTSS::InsertRule(const Rule &rule) {
             }
         }
     }
+
 }
 
 // -----------------------------------------------------------------------------
@@ -567,4 +570,3 @@ void SubHybridTSS::printInfo() {
     }
 
 }
-

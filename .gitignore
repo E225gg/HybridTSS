@@ -3,7 +3,6 @@ cmake-build-debug/
 acl_*
 result*
 *.o
-run.py
 fw*
 .*
 ErrorLog.csv
