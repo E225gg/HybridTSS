@@ -8,3 +8,5 @@ fw*
 .*
 ErrorLog.csv
 1
+improve.md
+.cpp-linter_cache

@@ -1,0 +1,2568 @@
+make: 'main' is up to date.
+./../ruleslwj/acl1_1k
+./../ruleslwj/acl1_1k_trace
+the number of rules = 851
+851
+8771
+class: PSTSS:
+        Construction time: 0.335157 ms
+
+Classify Performance:
+        87710 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000781 s
+        Average classification time: 0.089030 us
+        Throughput: 11.232204 Mpps
+
+Update Performance:
+        851 rules update: insert_num = 435 delete_num = 416
+        Total update time: 0.000180 s
+        Average update time: 0.211818 us
+        Throughput: 4.721037 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 2.07347 ms
+
+Classify Performance:
+        87710 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000820 s
+        Average classification time: 0.093441 us
+        Throughput: 10.701884 Mpps
+
+Update Performance:
+        851 rules update: insert_num = 435 delete_num = 416
+        Total update time: 0.000210 s
+        Average update time: 0.247141 us
+        Throughput: 4.046273 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 51255
+[DEBUG] Q-Table update lock contended: 4596
+[DEBUG] Contention ratio: 8.967%
+[DEBUG] Critical total time: 4.382 ms
+[DEBUG] Wait total time: 4.318 ms
+[DEBUG] Avg per critical: 0.085 µs
+Parallel training completed!
+        Construction time: 359.781 ms
+
+Classify Performance:
+        87710 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000418 s
+        Average classification time: 0.047638 us
+        Throughput: 20.991726 Mpps
+
+Update Performance:
+        851 rules update: insert_num = 435 delete_num = 416
+        Total update time: 0.000239 s
+        Average update time: 0.280313 us
+        Throughput: 3.567446 Mpps
+-------------------------------
+
+./../ruleslwj/acl2_1k
+./../ruleslwj/acl2_1k_trace
+the number of rules = 907
+907
+9071
+class: PSTSS:
+        Construction time: 0.307479 ms
+
+Classify Performance:
+        90710 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000958 s
+        Average classification time: 0.105606 us
+        Throughput: 9.469184 Mpps
+
+Update Performance:
+        907 rules update: insert_num = 460 delete_num = 447
+        Total update time: 0.000163 s
+        Average update time: 0.179822 us
+        Throughput: 5.561040 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 1.39106 ms
+
+Classify Performance:
+        90710 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000397 s
+        Average classification time: 0.043748 us
+        Throughput: 22.858401 Mpps
+
+Update Performance:
+        907 rules update: insert_num = 460 delete_num = 447
+        Total update time: 0.000103 s
+        Average update time: 0.113325 us
+        Throughput: 8.824159 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 50862
+[DEBUG] Q-Table update lock contended: 5084
+[DEBUG] Contention ratio: 9.996%
+[DEBUG] Critical total time: 3.834 ms
+[DEBUG] Wait total time: 3.886 ms
+[DEBUG] Avg per critical: 0.075 µs
+Parallel training completed!
+        Construction time: 253.923 ms
+
+Classify Performance:
+        90710 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000676 s
+        Average classification time: 0.074531 us
+        Throughput: 13.417186 Mpps
+
+Update Performance:
+        907 rules update: insert_num = 460 delete_num = 447
+        Total update time: 0.000115 s
+        Average update time: 0.126558 us
+        Throughput: 7.901523 Mpps
+-------------------------------
+
+./../ruleslwj/acl3_1k
+./../ruleslwj/acl3_1k_trace
+the number of rules = 971
+971
+9830
+class: PSTSS:
+        Construction time: 0.344806 ms
+
+Classify Performance:
+        98300 packets are classified, 0 of them are misclassified
+        Total classification time: 0.002168 s
+        Average classification time: 0.220554 us
+        Throughput: 4.534040 Mpps
+
+Update Performance:
+        971 rules update: insert_num = 492 delete_num = 479
+        Total update time: 0.000178 s
+        Average update time: 0.183550 us
+        Throughput: 5.448108 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 1.52099 ms
+
+Classify Performance:
+        98300 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000532 s
+        Average classification time: 0.054113 us
+        Throughput: 18.479740 Mpps
+
+Update Performance:
+        971 rules update: insert_num = 492 delete_num = 479
+        Total update time: 0.000126 s
+        Average update time: 0.130045 us
+        Throughput: 7.689627 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 50453
+[DEBUG] Q-Table update lock contended: 4679
+[DEBUG] Contention ratio: 9.274%
+[DEBUG] Critical total time: 4.635 ms
+[DEBUG] Wait total time: 4.599 ms
+[DEBUG] Avg per critical: 0.092 µs
+Parallel training completed!
+        Construction time: 270.075 ms
+
+Classify Performance:
+        98300 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000607 s
+        Average classification time: 0.061711 us
+        Throughput: 16.204645 Mpps
+
+Update Performance:
+        971 rules update: insert_num = 492 delete_num = 479
+        Total update time: 0.000166 s
+        Average update time: 0.170684 us
+        Throughput: 5.858786 Mpps
+-------------------------------
+
+./../ruleslwj/acl4_1k
+./../ruleslwj/acl4_1k_trace
+the number of rules = 984
+984
+10138
+class: PSTSS:
+        Construction time: 0.344276 ms
+
+Classify Performance:
+        101380 packets are classified, 0 of them are misclassified
+        Total classification time: 0.002138 s
+        Average classification time: 0.210875 us
+        Throughput: 4.742157 Mpps
+
+Update Performance:
+        984 rules update: insert_num = 500 delete_num = 484
+        Total update time: 0.000195 s
+        Average update time: 0.197677 us
+        Throughput: 5.058762 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 1.44988 ms
+
+Classify Performance:
+        101380 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000563 s
+        Average classification time: 0.055490 us
+        Throughput: 18.021189 Mpps
+
+Update Performance:
+        984 rules update: insert_num = 500 delete_num = 484
+        Total update time: 0.000145 s
+        Average update time: 0.147800 us
+        Throughput: 6.765909 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 49385
+[DEBUG] Q-Table update lock contended: 4464
+[DEBUG] Contention ratio: 9.039%
+[DEBUG] Critical total time: 4.706 ms
+[DEBUG] Wait total time: 6.388 ms
+[DEBUG] Avg per critical: 0.095 µs
+Parallel training completed!
+        Construction time: 280.732 ms
+
+Classify Performance:
+        101380 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000526 s
+        Average classification time: 0.051855 us
+        Throughput: 19.284385 Mpps
+
+Update Performance:
+        984 rules update: insert_num = 500 delete_num = 484
+        Total update time: 0.000110 s
+        Average update time: 0.111616 us
+        Throughput: 8.959301 Mpps
+-------------------------------
+
+./../ruleslwj/acl5_1k
+./../ruleslwj/acl5_1k_trace
+the number of rules = 880
+880
+8802
+class: PSTSS:
+        Construction time: 0.298037 ms
+
+Classify Performance:
+        88020 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000641 s
+        Average classification time: 0.072799 us
+        Throughput: 13.736480 Mpps
+
+Update Performance:
+        880 rules update: insert_num = 447 delete_num = 433
+        Total update time: 0.000164 s
+        Average update time: 0.186182 us
+        Throughput: 5.371094 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 1.66389 ms
+
+Classify Performance:
+        88020 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000550 s
+        Average classification time: 0.062438 us
+        Throughput: 16.015884 Mpps
+
+Update Performance:
+        880 rules update: insert_num = 447 delete_num = 433
+        Total update time: 0.000147 s
+        Average update time: 0.167066 us
+        Throughput: 5.985662 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 65808
+[DEBUG] Q-Table update lock contended: 7775
+[DEBUG] Contention ratio: 11.815%
+[DEBUG] Critical total time: 4.548 ms
+[DEBUG] Wait total time: 5.042 ms
+[DEBUG] Avg per critical: 0.069 µs
+Parallel training completed!
+        Construction time: 252.794 ms
+
+Classify Performance:
+        88020 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000194 s
+        Average classification time: 0.022073 us
+        Throughput: 45.303296 Mpps
+
+Update Performance:
+        880 rules update: insert_num = 447 delete_num = 433
+        Total update time: 0.000077 s
+        Average update time: 0.088003 us
+        Throughput: 11.363196 Mpps
+-------------------------------
+
+./../ruleslwj/acl1_10k
+./../ruleslwj/acl1_10k_trace
+the number of rules = 4740
+4740
+47620
+class: PSTSS:
+        Construction time: 1.39819 ms
+
+Classify Performance:
+        476200 packets are classified, 0 of them are misclassified
+        Total classification time: 0.010815 s
+        Average classification time: 0.227101 us
+        Throughput: 4.403318 Mpps
+
+Update Performance:
+        4740 rules update: insert_num = 2392 delete_num = 2348
+        Total update time: 0.001067 s
+        Average update time: 0.225114 us
+        Throughput: 4.442191 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 8.2509 ms
+
+Classify Performance:
+        476200 packets are classified, 0 of them are misclassified
+        Total classification time: 0.012301 s
+        Average classification time: 0.258307 us
+        Throughput: 3.871361 Mpps
+
+Update Performance:
+        4740 rules update: insert_num = 2392 delete_num = 2348
+        Total update time: 0.001374 s
+        Average update time: 0.289842 us
+        Throughput: 3.450151 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 143343
+[DEBUG] Q-Table update lock contended: 5502
+[DEBUG] Contention ratio: 3.838%
+[DEBUG] Critical total time: 61.593 ms
+[DEBUG] Wait total time: 12.490 ms
+[DEBUG] Avg per critical: 0.430 µs
+Parallel training completed!
+        Construction time: 2315.221 ms
+
+Classify Performance:
+        476200 packets are classified, 0 of them are misclassified
+        Total classification time: 0.002833 s
+        Average classification time: 0.059493 us
+        Throughput: 16.808735 Mpps
+
+Update Performance:
+        4740 rules update: insert_num = 2392 delete_num = 2348
+        Total update time: 0.007605 s
+        Average update time: 1.604338 us
+        Throughput: 0.623310 Mpps
+-------------------------------
+
+./../ruleslwj/acl2_10k
+./../ruleslwj/acl2_10k_trace
+the number of rules = 5373
+5373
+98211
+class: PSTSS:
+        Construction time: 1.92453 ms
+
+Classify Performance:
+        982110 packets are classified, 0 of them are misclassified
+        Total classification time: 0.009892 s
+        Average classification time: 0.100723 us
+        Throughput: 9.928198 Mpps
+
+Update Performance:
+        5373 rules update: insert_num = 2698 delete_num = 2675
+        Total update time: 0.000943 s
+        Average update time: 0.175446 us
+        Throughput: 5.699768 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 7.835 ms
+
+Classify Performance:
+        982110 packets are classified, 0 of them are misclassified
+        Total classification time: 0.008031 s
+        Average classification time: 0.081775 us
+        Throughput: 12.228671 Mpps
+
+Update Performance:
+        5373 rules update: insert_num = 2698 delete_num = 2675
+        Total update time: 0.001009 s
+        Average update time: 0.187757 us
+        Throughput: 5.326035 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 279058
+[DEBUG] Q-Table update lock contended: 8882
+[DEBUG] Contention ratio: 3.183%
+[DEBUG] Critical total time: 68.904 ms
+[DEBUG] Wait total time: 16.883 ms
+[DEBUG] Avg per critical: 0.247 µs
+Parallel training completed!
+        Construction time: 2601.844 ms
+
+Classify Performance:
+        982110 packets are classified, 0 of them are misclassified
+        Total classification time: 0.024259 s
+        Average classification time: 0.247010 us
+        Throughput: 4.048419 Mpps
+
+Update Performance:
+        5373 rules update: insert_num = 2698 delete_num = 2675
+        Total update time: 0.001294 s
+        Average update time: 0.240884 us
+        Throughput: 4.151375 Mpps
+-------------------------------
+
+./../ruleslwj/acl3_10k
+./../ruleslwj/acl3_10k_trace
+the number of rules = 8484
+8484
+84840
+class: PSTSS:
+        Construction time: 2.6502 ms
+
+Classify Performance:
+        848400 packets are classified, 0 of them are misclassified
+        Total classification time: 0.025351 s
+        Average classification time: 0.298811 us
+        Throughput: 3.346602 Mpps
+
+Update Performance:
+        8484 rules update: insert_num = 4317 delete_num = 4167
+        Total update time: 0.001367 s
+        Average update time: 0.161090 us
+        Throughput: 6.207726 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 13.0023 ms
+
+Classify Performance:
+        848400 packets are classified, 0 of them are misclassified
+        Total classification time: 0.010801 s
+        Average classification time: 0.127313 us
+        Throughput: 7.854679 Mpps
+
+Update Performance:
+        8484 rules update: insert_num = 4317 delete_num = 4167
+        Total update time: 0.001703 s
+        Average update time: 0.200778 us
+        Throughput: 4.980621 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 366437
+[DEBUG] Q-Table update lock contended: 9960
+[DEBUG] Contention ratio: 2.718%
+[DEBUG] Critical total time: 104.050 ms
+[DEBUG] Wait total time: 26.854 ms
+[DEBUG] Avg per critical: 0.284 µs
+Parallel training completed!
+        Construction time: 4230.756 ms
+
+Classify Performance:
+        848400 packets are classified, 0 of them are misclassified
+        Total classification time: 0.005747 s
+        Average classification time: 0.067736 us
+        Throughput: 14.763282 Mpps
+
+Update Performance:
+        8484 rules update: insert_num = 4317 delete_num = 4167
+        Total update time: 0.001331 s
+        Average update time: 0.156885 us
+        Throughput: 6.374093 Mpps
+-------------------------------
+
+./../ruleslwj/acl4_10k
+./../ruleslwj/acl4_10k_trace
+the number of rules = 8446
+8446
+84462
+class: PSTSS:
+        Construction time: 2.9502 ms
+
+Classify Performance:
+        844620 packets are classified, 0 of them are misclassified
+        Total classification time: 0.055397 s
+        Average classification time: 0.655884 us
+        Throughput: 1.524659 Mpps
+
+Update Performance:
+        8446 rules update: insert_num = 4301 delete_num = 4145
+        Total update time: 0.001548 s
+        Average update time: 0.183274 us
+        Throughput: 5.456298 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 12.2694 ms
+
+Classify Performance:
+        844620 packets are classified, 0 of them are misclassified
+        Total classification time: 0.009453 s
+        Average classification time: 0.111916 us
+        Throughput: 8.935306 Mpps
+
+Update Performance:
+        8446 rules update: insert_num = 4301 delete_num = 4145
+        Total update time: 0.001954 s
+        Average update time: 0.231352 us
+        Throughput: 4.322409 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 310577
+[DEBUG] Q-Table update lock contended: 7740
+[DEBUG] Contention ratio: 2.492%
+[DEBUG] Critical total time: 82.275 ms
+[DEBUG] Wait total time: 15.504 ms
+[DEBUG] Avg per critical: 0.265 µs
+Parallel training completed!
+        Construction time: 4354.199 ms
+
+Classify Performance:
+        844620 packets are classified, 0 of them are misclassified
+        Total classification time: 0.006338 s
+        Average classification time: 0.075045 us
+        Throughput: 13.325360 Mpps
+
+Update Performance:
+        8446 rules update: insert_num = 4301 delete_num = 4145
+        Total update time: 0.001314 s
+        Average update time: 0.155524 us
+        Throughput: 6.429879 Mpps
+-------------------------------
+
+./../ruleslwj/acl5_10k
+./../ruleslwj/acl5_10k_trace
+the number of rules = 5544
+5544
+55808
+class: PSTSS:
+        Construction time: 1.77596 ms
+
+Classify Performance:
+        558080 packets are classified, 0 of them are misclassified
+        Total classification time: 0.007074 s
+        Average classification time: 0.126757 us
+        Throughput: 7.889082 Mpps
+
+Update Performance:
+        5544 rules update: insert_num = 2797 delete_num = 2747
+        Total update time: 0.000949 s
+        Average update time: 0.171251 us
+        Throughput: 5.839391 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 9.3879 ms
+
+Classify Performance:
+        558080 packets are classified, 0 of them are misclassified
+        Total classification time: 0.006666 s
+        Average classification time: 0.119444 us
+        Throughput: 8.372159 Mpps
+
+Update Performance:
+        5544 rules update: insert_num = 2797 delete_num = 2747
+        Total update time: 0.001224 s
+        Average update time: 0.220796 us
+        Throughput: 4.529068 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 326014
+[DEBUG] Q-Table update lock contended: 18001
+[DEBUG] Contention ratio: 5.522%
+[DEBUG] Critical total time: 86.658 ms
+[DEBUG] Wait total time: 47.569 ms
+[DEBUG] Avg per critical: 0.266 µs
+Parallel training completed!
+        Construction time: 2489.081 ms
+
+Classify Performance:
+        558080 packets are classified, 0 of them are misclassified
+        Total classification time: 0.001763 s
+        Average classification time: 0.031590 us
+        Throughput: 31.655823 Mpps
+
+Update Performance:
+        5544 rules update: insert_num = 2797 delete_num = 2747
+        Total update time: 0.000701 s
+        Average update time: 0.126448 us
+        Throughput: 7.908375 Mpps
+-------------------------------
+
+./../ruleslwj/acl1_100k
+./../ruleslwj/acl1_100k_trace
+the number of rules = 14252
+14252
+274061
+class: PSTSS:
+        Construction time: 5.16611 ms
+
+Classify Performance:
+        2740610 packets are classified, 0 of them are misclassified
+        Total classification time: 0.276381 s
+        Average classification time: 1.008464 us
+        Throughput: 0.991607 Mpps
+
+Update Performance:
+        14252 rules update: insert_num = 7187 delete_num = 7065
+        Total update time: 0.006570 s
+        Average update time: 0.460979 us
+        Throughput: 2.169298 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 29.8787 ms
+
+Classify Performance:
+        2740610 packets are classified, 0 of them are misclassified
+        Total classification time: 0.277950 s
+        Average classification time: 1.014189 us
+        Throughput: 0.986010 Mpps
+
+Update Performance:
+        14252 rules update: insert_num = 7187 delete_num = 7065
+        Total update time: 0.007266 s
+        Average update time: 0.509816 us
+        Throughput: 1.961493 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 246385
+[DEBUG] Q-Table update lock contended: 2384
+[DEBUG] Contention ratio: 0.968%
+[DEBUG] Critical total time: 112.692 ms
+[DEBUG] Wait total time: 12.308 ms
+[DEBUG] Avg per critical: 0.457 µs
+Parallel training completed!
+        Construction time: 10411.169 ms
+
+Classify Performance:
+        2740610 packets are classified, 0 of them are misclassified
+        Total classification time: 0.066767 s
+        Average classification time: 0.243622 us
+        Throughput: 4.104724 Mpps
+
+Update Performance:
+        14252 rules update: insert_num = 7187 delete_num = 7065
+        Total update time: 0.147125 s
+        Average update time: 10.323110 us
+        Throughput: 0.096870 Mpps
+-------------------------------
+
+./../ruleslwj/acl2_100k
+./../ruleslwj/acl2_100k_trace
+the number of rules = 29417
+29417
+381183
+class: PSTSS:
+        Construction time: 12.3109 ms
+
+Classify Performance:
+        3811830 packets are classified, 0 of them are misclassified
+        Total classification time: 0.054664 s
+        Average classification time: 0.143406 us
+        Throughput: 6.973229 Mpps
+
+Update Performance:
+        29417 rules update: insert_num = 14838 delete_num = 14579
+        Total update time: 0.007604 s
+        Average update time: 0.258480 us
+        Throughput: 3.868767 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 49.4445 ms
+
+Classify Performance:
+        3811830 packets are classified, 0 of them are misclassified
+        Total classification time: 0.049284 s
+        Average classification time: 0.129291 us
+        Throughput: 7.734484 Mpps
+
+Update Performance:
+        29417 rules update: insert_num = 14838 delete_num = 14579
+        Total update time: 0.010968 s
+        Average update time: 0.372862 us
+        Throughput: 2.681960 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 1278311
+[DEBUG] Q-Table update lock contended: 26368
+[DEBUG] Contention ratio: 2.063%
+[DEBUG] Critical total time: 258.041 ms
+[DEBUG] Wait total time: 57.798 ms
+[DEBUG] Avg per critical: 0.202 µs
+Parallel training completed!
+        Construction time: 19161.945 ms
+
+Classify Performance:
+        3811830 packets are classified, 0 of them are misclassified
+        Total classification time: 0.088802 s
+        Average classification time: 0.232964 us
+        Throughput: 4.292512 Mpps
+
+Update Performance:
+        29417 rules update: insert_num = 14838 delete_num = 14579
+        Total update time: 0.008965 s
+        Average update time: 0.304763 us
+        Throughput: 3.281241 Mpps
+-------------------------------
+
+./../ruleslwj/acl3_100k
+./../ruleslwj/acl3_100k_trace
+the number of rules = 62925
+62925
+629255
+class: PSTSS:
+        Construction time: 20.302 ms
+
+Classify Performance:
+        6292550 packets are classified, 0 of them are misclassified
+        Total classification time: 0.315363 s
+        Average classification time: 0.501169 us
+        Throughput: 1.995335 Mpps
+
+Update Performance:
+        62925 rules update: insert_num = 31601 delete_num = 31324
+        Total update time: 0.019132 s
+        Average update time: 0.304051 us
+        Throughput: 3.288923 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 129.926 ms
+
+Classify Performance:
+        6292550 packets are classified, 0 of them are misclassified
+        Total classification time: 0.265404 s
+        Average classification time: 0.421775 us
+        Throughput: 2.370931 Mpps
+
+Update Performance:
+        62925 rules update: insert_num = 31601 delete_num = 31324
+        Total update time: 0.027164 s
+        Average update time: 0.431692 us
+        Throughput: 2.316468 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 1628319
+[DEBUG] Q-Table update lock contended: 11922
+[DEBUG] Contention ratio: 0.732%
+[DEBUG] Critical total time: 354.573 ms
+[DEBUG] Wait total time: 60.814 ms
+[DEBUG] Avg per critical: 0.218 µs
+Parallel training completed!
+        Construction time: 39730.227 ms
+
+Classify Performance:
+        6292550 packets are classified, 0 of them are misclassified
+        Total classification time: 0.100368 s
+        Average classification time: 0.159502 us
+        Throughput: 6.269495 Mpps
+
+Update Performance:
+        62925 rules update: insert_num = 31601 delete_num = 31324
+        Total update time: 0.019366 s
+        Average update time: 0.307764 us
+        Throughput: 3.249248 Mpps
+-------------------------------
+
+./../ruleslwj/acl4_100k
+./../ruleslwj/acl4_100k_trace
+the number of rules = 64660
+64660
+646703
+class: PSTSS:
+        Construction time: 28.6202 ms
+
+Classify Performance:
+        6467030 packets are classified, 0 of them are misclassified
+        Total classification time: 0.372055 s
+        Average classification time: 0.575311 us
+        Throughput: 1.738190 Mpps
+
+Update Performance:
+        64660 rules update: insert_num = 32465 delete_num = 32195
+        Total update time: 0.020744 s
+        Average update time: 0.320820 us
+        Throughput: 3.117008 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 136.198 ms
+
+Classify Performance:
+        6467030 packets are classified, 0 of them are misclassified
+        Total classification time: 0.317721 s
+        Average classification time: 0.491294 us
+        Throughput: 2.035443 Mpps
+
+Update Performance:
+        64660 rules update: insert_num = 32465 delete_num = 32195
+        Total update time: 0.027459 s
+        Average update time: 0.424669 us
+        Throughput: 2.354774 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 1600359
+[DEBUG] Q-Table update lock contended: 15715
+[DEBUG] Contention ratio: 0.982%
+[DEBUG] Critical total time: 318.578 ms
+[DEBUG] Wait total time: 66.297 ms
+[DEBUG] Avg per critical: 0.199 µs
+Parallel training completed!
+        Construction time: 41528.385 ms
+
+Classify Performance:
+        6467030 packets are classified, 0 of them are misclassified
+        Total classification time: 0.126048 s
+        Average classification time: 0.194909 us
+        Throughput: 5.130591 Mpps
+
+Update Performance:
+        64660 rules update: insert_num = 32465 delete_num = 32195
+        Total update time: 0.021503 s
+        Average update time: 0.332549 us
+        Throughput: 3.007073 Mpps
+-------------------------------
+
+./../ruleslwj/acl5_100k
+./../ruleslwj/acl5_100k_trace
+the number of rules = 31657
+31657
+316651
+class: PSTSS:
+        Construction time: 11.2348 ms
+
+Classify Performance:
+        3166510 packets are classified, 0 of them are misclassified
+        Total classification time: 0.043764 s
+        Average classification time: 0.138209 us
+        Throughput: 7.235396 Mpps
+
+Update Performance:
+        31657 rules update: insert_num = 15966 delete_num = 15691
+        Total update time: 0.007536 s
+        Average update time: 0.238061 us
+        Throughput: 4.200601 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 70.3665 ms
+
+Classify Performance:
+        3166510 packets are classified, 0 of them are misclassified
+        Total classification time: 0.057898 s
+        Average classification time: 0.182845 us
+        Throughput: 5.469105 Mpps
+
+Update Performance:
+        31657 rules update: insert_num = 15966 delete_num = 15691
+        Total update time: 0.008757 s
+        Average update time: 0.276612 us
+        Throughput: 3.615168 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 1364215
+[DEBUG] Q-Table update lock contended: 28630
+[DEBUG] Contention ratio: 2.099%
+[DEBUG] Critical total time: 297.047 ms
+[DEBUG] Wait total time: 62.336 ms
+[DEBUG] Avg per critical: 0.218 µs
+Parallel training completed!
+        Construction time: 18726.058 ms
+
+Classify Performance:
+        3166510 packets are classified, 0 of them are misclassified
+        Total classification time: 0.021011 s
+        Average classification time: 0.066353 us
+        Throughput: 15.070991 Mpps
+
+Update Performance:
+        31657 rules update: insert_num = 15966 delete_num = 15691
+        Total update time: 0.007903 s
+        Average update time: 0.249656 us
+        Throughput: 4.005510 Mpps
+-------------------------------
+
+./../ruleslwj/ipc1_1k
+./../ruleslwj/ipc1_1k_trace
+the number of rules = 917
+917
+39633
+class: PSTSS:
+        Construction time: 0.416435 ms
+
+Classify Performance:
+        396330 packets are classified, 0 of them are misclassified
+        Total classification time: 0.008617 s
+        Average classification time: 0.217415 us
+        Throughput: 4.599501 Mpps
+
+Update Performance:
+        917 rules update: insert_num = 466 delete_num = 451
+        Total update time: 0.000180 s
+        Average update time: 0.196812 us
+        Throughput: 5.080980 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 1.48649 ms
+
+Classify Performance:
+        396330 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000721 s
+        Average classification time: 0.018203 us
+        Throughput: 54.936814 Mpps
+
+Update Performance:
+        917 rules update: insert_num = 466 delete_num = 451
+        Total update time: 0.000106 s
+        Average update time: 0.115228 us
+        Throughput: 8.678452 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 48339
+[DEBUG] Q-Table update lock contended: 4480
+[DEBUG] Contention ratio: 9.268%
+[DEBUG] Critical total time: 3.769 ms
+[DEBUG] Wait total time: 3.785 ms
+[DEBUG] Avg per critical: 0.078 µs
+Parallel training completed!
+        Construction time: 300.846 ms
+
+Classify Performance:
+        396330 packets are classified, 0 of them are misclassified
+        Total classification time: 0.002502 s
+        Average classification time: 0.063139 us
+        Throughput: 15.838127 Mpps
+
+Update Performance:
+        917 rules update: insert_num = 466 delete_num = 451
+        Total update time: 0.000094 s
+        Average update time: 0.102604 us
+        Throughput: 9.746195 Mpps
+-------------------------------
+
+./../ruleslwj/ipc2_1k
+./../ruleslwj/ipc2_1k_trace
+the number of rules = 388
+388
+3881
+class: PSTSS:
+        Construction time: 0.164685 ms
+
+Classify Performance:
+        38810 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000176 s
+        Average classification time: 0.045394 us
+        Throughput: 22.029395 Mpps
+
+Update Performance:
+        388 rules update: insert_num = 202 delete_num = 186
+        Total update time: 0.000071 s
+        Average update time: 0.181771 us
+        Throughput: 5.501439 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 0.778897 ms
+
+Classify Performance:
+        38810 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000131 s
+        Average classification time: 0.033755 us
+        Throughput: 29.625479 Mpps
+
+Update Performance:
+        388 rules update: insert_num = 202 delete_num = 186
+        Total update time: 0.000048 s
+        Average update time: 0.124446 us
+        Throughput: 8.035622 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 40101
+[DEBUG] Q-Table update lock contended: 5488
+[DEBUG] Contention ratio: 13.685%
+[DEBUG] Critical total time: 2.655 ms
+[DEBUG] Wait total time: 3.717 ms
+[DEBUG] Avg per critical: 0.066 µs
+Parallel training completed!
+        Construction time: 199.890 ms
+
+Classify Performance:
+        38810 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000117 s
+        Average classification time: 0.030146 us
+        Throughput: 33.172103 Mpps
+
+Update Performance:
+        388 rules update: insert_num = 202 delete_num = 186
+        Total update time: 0.000059 s
+        Average update time: 0.151379 us
+        Throughput: 6.605942 Mpps
+-------------------------------
+
+./../ruleslwj/ipc1_10k
+./../ruleslwj/ipc1_10k_trace
+the number of rules = 7744
+7744
+77450
+class: PSTSS:
+        Construction time: 2.49109 ms
+
+Classify Performance:
+        774500 packets are classified, 0 of them are misclassified
+        Total classification time: 0.023466 s
+        Average classification time: 0.302986 us
+        Throughput: 3.300488 Mpps
+
+Update Performance:
+        7744 rules update: insert_num = 3940 delete_num = 3804
+        Total update time: 0.001429 s
+        Average update time: 0.184585 us
+        Throughput: 5.417552 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 12.1767 ms
+
+Classify Performance:
+        774500 packets are classified, 0 of them are misclassified
+        Total classification time: 0.009316 s
+        Average classification time: 0.120288 us
+        Throughput: 8.313394 Mpps
+
+Update Performance:
+        7744 rules update: insert_num = 3940 delete_num = 3804
+        Total update time: 0.001384 s
+        Average update time: 0.178740 us
+        Throughput: 5.594725 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 373407
+[DEBUG] Q-Table update lock contended: 11666
+[DEBUG] Contention ratio: 3.124%
+[DEBUG] Critical total time: 139.708 ms
+[DEBUG] Wait total time: 28.293 ms
+[DEBUG] Avg per critical: 0.374 µs
+Parallel training completed!
+        Construction time: 4270.946 ms
+
+Classify Performance:
+        774500 packets are classified, 0 of them are misclassified
+        Total classification time: 0.006435 s
+        Average classification time: 0.083086 us
+        Throughput: 12.035767 Mpps
+
+Update Performance:
+        7744 rules update: insert_num = 3940 delete_num = 3804
+        Total update time: 0.001130 s
+        Average update time: 0.145861 us
+        Throughput: 6.855834 Mpps
+-------------------------------
+
+./../ruleslwj/ipc2_10k
+./../ruleslwj/ipc2_10k_trace
+the number of rules = 914
+914
+9268
+class: PSTSS:
+        Construction time: 0.291585 ms
+
+Classify Performance:
+        92680 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000493 s
+        Average classification time: 0.053182 us
+        Throughput: 18.803209 Mpps
+
+Update Performance:
+        914 rules update: insert_num = 463 delete_num = 451
+        Total update time: 0.000144 s
+        Average update time: 0.157357 us
+        Throughput: 6.354989 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 2.01868 ms
+
+Classify Performance:
+        92680 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000508 s
+        Average classification time: 0.054821 us
+        Throughput: 18.241297 Mpps
+
+Update Performance:
+        914 rules update: insert_num = 463 delete_num = 451
+        Total update time: 0.000220 s
+        Average update time: 0.241039 us
+        Throughput: 4.148700 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 96835
+[DEBUG] Q-Table update lock contended: 16587
+[DEBUG] Contention ratio: 17.129%
+[DEBUG] Critical total time: 9.237 ms
+[DEBUG] Wait total time: 19.731 ms
+[DEBUG] Avg per critical: 0.095 µs
+Parallel training completed!
+        Construction time: 282.741 ms
+
+Classify Performance:
+        92680 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000487 s
+        Average classification time: 0.052545 us
+        Throughput: 19.031141 Mpps
+
+Update Performance:
+        914 rules update: insert_num = 463 delete_num = 451
+        Total update time: 0.000142 s
+        Average update time: 0.155037 us
+        Throughput: 6.450065 Mpps
+-------------------------------
+
+./../ruleslwj/ipc1_100k
+./../ruleslwj/ipc1_100k_trace
+the number of rules = 52464
+52464
+526592
+class: PSTSS:
+        Construction time: 17.6255 ms
+
+Classify Performance:
+        5265920 packets are classified, 0 of them are misclassified
+        Total classification time: 0.206328 s
+        Average classification time: 0.391818 us
+        Throughput: 2.552203 Mpps
+
+Update Performance:
+        52464 rules update: insert_num = 26396 delete_num = 26068
+        Total update time: 0.012387 s
+        Average update time: 0.236111 us
+        Throughput: 4.235294 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 112.647 ms
+
+Classify Performance:
+        5265920 packets are classified, 0 of them are misclassified
+        Total classification time: 0.148241 s
+        Average classification time: 0.281509 us
+        Throughput: 3.552280 Mpps
+
+Update Performance:
+        52464 rules update: insert_num = 26396 delete_num = 26068
+        Total update time: 0.022915 s
+        Average update time: 0.436785 us
+        Throughput: 2.289456 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 1717559
+[DEBUG] Q-Table update lock contended: 22176
+[DEBUG] Contention ratio: 1.291%
+[DEBUG] Critical total time: 433.877 ms
+[DEBUG] Wait total time: 70.249 ms
+[DEBUG] Avg per critical: 0.253 µs
+Parallel training completed!
+        Construction time: 34654.137 ms
+
+Classify Performance:
+        5265920 packets are classified, 0 of them are misclassified
+        Total classification time: 0.090278 s
+        Average classification time: 0.171438 us
+        Throughput: 5.833028 Mpps
+
+Update Performance:
+        52464 rules update: insert_num = 26396 delete_num = 26068
+        Total update time: 0.013516 s
+        Average update time: 0.257625 us
+        Throughput: 3.881616 Mpps
+-------------------------------
+
+./../ruleslwj/ipc2_100k
+./../ruleslwj/ipc2_100k_trace
+the number of rules = 2534
+2534
+25344
+class: PSTSS:
+        Construction time: 0.814725 ms
+
+Classify Performance:
+        253440 packets are classified, 0 of them are misclassified
+        Total classification time: 0.001251 s
+        Average classification time: 0.049355 us
+        Throughput: 20.261421 Mpps
+
+Update Performance:
+        2534 rules update: insert_num = 1284 delete_num = 1250
+        Total update time: 0.000414 s
+        Average update time: 0.163461 us
+        Throughput: 6.117670 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 5.31163 ms
+
+Classify Performance:
+        253440 packets are classified, 0 of them are misclassified
+        Total classification time: 0.001963 s
+        Average classification time: 0.077435 us
+        Throughput: 12.913989 Mpps
+
+Update Performance:
+        2534 rules update: insert_num = 1284 delete_num = 1250
+        Total update time: 0.000515 s
+        Average update time: 0.203251 us
+        Throughput: 4.920025 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 191049
+[DEBUG] Q-Table update lock contended: 15602
+[DEBUG] Contention ratio: 8.166%
+[DEBUG] Critical total time: 58.478 ms
+[DEBUG] Wait total time: 32.297 ms
+[DEBUG] Avg per critical: 0.306 µs
+Parallel training completed!
+        Construction time: 1083.594 ms
+
+Classify Performance:
+        253440 packets are classified, 0 of them are misclassified
+        Total classification time: 0.001281 s
+        Average classification time: 0.050556 us
+        Throughput: 19.779928 Mpps
+
+Update Performance:
+        2534 rules update: insert_num = 1284 delete_num = 1250
+        Total update time: 0.000421 s
+        Average update time: 0.166051 us
+        Throughput: 6.022250 Mpps
+-------------------------------
+
+./../ruleslwj/fw1_1k
+./../ruleslwj/fw1_1k_trace
+the number of rules = 706
+706
+8808
+class: PSTSS:
+        Construction time: 0.224953 ms
+
+Classify Performance:
+        88080 packets are classified, 0 of them are misclassified
+        Total classification time: 0.001096 s
+        Average classification time: 0.124448 us
+        Throughput: 8.035473 Mpps
+
+Update Performance:
+        706 rules update: insert_num = 363 delete_num = 343
+        Total update time: 0.000138 s
+        Average update time: 0.195735 us
+        Throughput: 5.108945 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 1.40037 ms
+
+Classify Performance:
+        88080 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000607 s
+        Average classification time: 0.068871 us
+        Throughput: 14.519801 Mpps
+
+Update Performance:
+        706 rules update: insert_num = 363 delete_num = 343
+        Total update time: 0.000154 s
+        Average update time: 0.218547 us
+        Throughput: 4.575680 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 41536
+[DEBUG] Q-Table update lock contended: 3920
+[DEBUG] Contention ratio: 9.438%
+[DEBUG] Critical total time: 2.934 ms
+[DEBUG] Wait total time: 2.911 ms
+[DEBUG] Avg per critical: 0.071 µs
+Parallel training completed!
+        Construction time: 242.363 ms
+
+Classify Performance:
+        88080 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000805 s
+        Average classification time: 0.091376 us
+        Throughput: 10.943844 Mpps
+
+Update Performance:
+        706 rules update: insert_num = 363 delete_num = 343
+        Total update time: 0.000076 s
+        Average update time: 0.107789 us
+        Throughput: 9.277389 Mpps
+-------------------------------
+
+./../ruleslwj/fw2_1k
+./../ruleslwj/fw2_1k_trace
+the number of rules = 419
+419
+4198
+class: PSTSS:
+        Construction time: 0.120121 ms
+
+Classify Performance:
+        41980 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000259 s
+        Average classification time: 0.061759 us
+        Throughput: 16.191971 Mpps
+
+Update Performance:
+        419 rules update: insert_num = 224 delete_num = 195
+        Total update time: 0.000073 s
+        Average update time: 0.173883 us
+        Throughput: 5.750992 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 0.742576 ms
+
+Classify Performance:
+        41980 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000261 s
+        Average classification time: 0.062209 us
+        Throughput: 16.074739 Mpps
+
+Update Performance:
+        419 rules update: insert_num = 224 delete_num = 195
+        Total update time: 0.000080 s
+        Average update time: 0.191652 us
+        Throughput: 5.217803 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 34429
+[DEBUG] Q-Table update lock contended: 5224
+[DEBUG] Contention ratio: 15.173%
+[DEBUG] Critical total time: 2.712 ms
+[DEBUG] Wait total time: 3.998 ms
+[DEBUG] Avg per critical: 0.079 µs
+Parallel training completed!
+        Construction time: 207.132 ms
+
+Classify Performance:
+        41980 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000143 s
+        Average classification time: 0.034143 us
+        Throughput: 29.288808 Mpps
+
+Update Performance:
+        419 rules update: insert_num = 224 delete_num = 195
+        Total update time: 0.000052 s
+        Average update time: 0.125153 us
+        Throughput: 7.990236 Mpps
+-------------------------------
+
+./../ruleslwj/fw3_1k
+./../ruleslwj/fw3_1k_trace
+the number of rules = 364
+364
+4224
+class: PSTSS:
+        Construction time: 0.097751 ms
+
+Classify Performance:
+        42240 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000799 s
+        Average classification time: 0.189056 us
+        Throughput: 5.289430 Mpps
+
+Update Performance:
+        364 rules update: insert_num = 192 delete_num = 172
+        Total update time: 0.000092 s
+        Average update time: 0.252140 us
+        Throughput: 3.966049 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 0.68583 ms
+
+Classify Performance:
+        42240 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000605 s
+        Average classification time: 0.143230 us
+        Throughput: 6.981786 Mpps
+
+Update Performance:
+        364 rules update: insert_num = 192 delete_num = 172
+        Total update time: 0.000089 s
+        Average update time: 0.244832 us
+        Throughput: 4.084426 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 27066
+[DEBUG] Q-Table update lock contended: 3233
+[DEBUG] Contention ratio: 11.945%
+[DEBUG] Critical total time: 1.823 ms
+[DEBUG] Wait total time: 1.950 ms
+[DEBUG] Avg per critical: 0.067 µs
+Parallel training completed!
+        Construction time: 197.549 ms
+
+Classify Performance:
+        42240 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000285 s
+        Average classification time: 0.067357 us
+        Throughput: 14.846244 Mpps
+
+Update Performance:
+        364 rules update: insert_num = 192 delete_num = 172
+        Total update time: 0.000048 s
+        Average update time: 0.133129 us
+        Throughput: 7.511505 Mpps
+-------------------------------
+
+./../ruleslwj/fw4_1k
+./../ruleslwj/fw4_1k_trace
+the number of rules = 736
+736
+7376
+class: PSTSS:
+        Construction time: 0.278496 ms
+
+Classify Performance:
+        73760 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000983 s
+        Average classification time: 0.133234 us
+        Throughput: 7.505567 Mpps
+
+Update Performance:
+        736 rules update: insert_num = 374 delete_num = 362
+        Total update time: 0.000164 s
+        Average update time: 0.223424 us
+        Throughput: 4.475797 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 1.40617 ms
+
+Classify Performance:
+        73760 packets are classified, 0 of them are misclassified
+        Total classification time: 0.001076 s
+        Average classification time: 0.145823 us
+        Throughput: 6.857651 Mpps
+
+Update Performance:
+        736 rules update: insert_num = 374 delete_num = 362
+        Total update time: 0.000152 s
+        Average update time: 0.206924 us
+        Throughput: 4.832694 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 43401
+[DEBUG] Q-Table update lock contended: 3718
+[DEBUG] Contention ratio: 8.567%
+[DEBUG] Critical total time: 3.081 ms
+[DEBUG] Wait total time: 2.574 ms
+[DEBUG] Avg per critical: 0.071 µs
+Parallel training completed!
+        Construction time: 226.002 ms
+
+Classify Performance:
+        73760 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000490 s
+        Average classification time: 0.066404 us
+        Throughput: 15.059331 Mpps
+
+Update Performance:
+        736 rules update: insert_num = 374 delete_num = 362
+        Total update time: 0.000074 s
+        Average update time: 0.100069 us
+        Throughput: 9.993075 Mpps
+-------------------------------
+
+./../ruleslwj/fw5_1k
+./../ruleslwj/fw5_1k_trace
+the number of rules = 492
+492
+4923
+class: PSTSS:
+        Construction time: 0.194641 ms
+
+Classify Performance:
+        49230 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000635 s
+        Average classification time: 0.128984 us
+        Throughput: 7.752891 Mpps
+
+Update Performance:
+        492 rules update: insert_num = 257 delete_num = 235
+        Total update time: 0.000089 s
+        Average update time: 0.180862 us
+        Throughput: 5.529084 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 0.833961 ms
+
+Classify Performance:
+        49230 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000542 s
+        Average classification time: 0.110080 us
+        Throughput: 9.084338 Mpps
+
+Update Performance:
+        492 rules update: insert_num = 257 delete_num = 235
+        Total update time: 0.000104 s
+        Average update time: 0.211435 us
+        Throughput: 4.729587 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 27237
+[DEBUG] Q-Table update lock contended: 2337
+[DEBUG] Contention ratio: 8.580%
+[DEBUG] Critical total time: 2.259 ms
+[DEBUG] Wait total time: 1.978 ms
+[DEBUG] Avg per critical: 0.083 µs
+Parallel training completed!
+        Construction time: 226.179 ms
+
+Classify Performance:
+        49230 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000345 s
+        Average classification time: 0.070017 us
+        Throughput: 14.282150 Mpps
+
+Update Performance:
+        492 rules update: insert_num = 257 delete_num = 235
+        Total update time: 0.000069 s
+        Average update time: 0.140972 us
+        Throughput: 7.093630 Mpps
+-------------------------------
+
+./../ruleslwj/fw1_10k
+./../ruleslwj/fw1_10k_trace
+the number of rules = 2805
+2805
+35309
+class: PSTSS:
+        Construction time: 0.853866 ms
+
+Classify Performance:
+        353090 packets are classified, 0 of them are misclassified
+        Total classification time: 0.011389 s
+        Average classification time: 0.322558 us
+        Throughput: 3.100222 Mpps
+
+Update Performance:
+        2805 rules update: insert_num = 1438 delete_num = 1367
+        Total update time: 0.000621 s
+        Average update time: 0.221562 us
+        Throughput: 4.513412 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 5.1584 ms
+
+Classify Performance:
+        353090 packets are classified, 0 of them are misclassified
+        Total classification time: 0.010438 s
+        Average classification time: 0.295613 us
+        Throughput: 3.382800 Mpps
+
+Update Performance:
+        2805 rules update: insert_num = 1438 delete_num = 1367
+        Total update time: 0.000747 s
+        Average update time: 0.266264 us
+        Throughput: 3.755669 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 127588
+[DEBUG] Q-Table update lock contended: 8020
+[DEBUG] Contention ratio: 6.286%
+[DEBUG] Critical total time: 47.265 ms
+[DEBUG] Wait total time: 14.106 ms
+[DEBUG] Avg per critical: 0.370 µs
+Parallel training completed!
+        Construction time: 1261.588 ms
+
+Classify Performance:
+        353090 packets are classified, 0 of them are misclassified
+        Total classification time: 0.002808 s
+        Average classification time: 0.079527 us
+        Throughput: 12.574313 Mpps
+
+Update Performance:
+        2805 rules update: insert_num = 1438 delete_num = 1367
+        Total update time: 0.000372 s
+        Average update time: 0.132628 us
+        Throughput: 7.539877 Mpps
+-------------------------------
+
+./../ruleslwj/fw2_10k
+./../ruleslwj/fw2_10k_trace
+the number of rules = 1298
+1298
+13749
+class: PSTSS:
+        Construction time: 0.409664 ms
+
+Classify Performance:
+        137490 packets are classified, 0 of them are misclassified
+        Total classification time: 0.001031 s
+        Average classification time: 0.074964 us
+        Throughput: 13.339816 Mpps
+
+Update Performance:
+        1298 rules update: insert_num = 641 delete_num = 657
+        Total update time: 0.000248 s
+        Average update time: 0.190684 us
+        Throughput: 5.244275 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 2.20364 ms
+
+Classify Performance:
+        137490 packets are classified, 0 of them are misclassified
+        Total classification time: 0.001286 s
+        Average classification time: 0.093506 us
+        Throughput: 10.694527 Mpps
+
+Update Performance:
+        1298 rules update: insert_num = 641 delete_num = 657
+        Total update time: 0.000265 s
+        Average update time: 0.204276 us
+        Throughput: 4.895342 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 91946
+[DEBUG] Q-Table update lock contended: 8952
+[DEBUG] Contention ratio: 9.736%
+[DEBUG] Critical total time: 14.627 ms
+[DEBUG] Wait total time: 12.870 ms
+[DEBUG] Avg per critical: 0.159 µs
+Parallel training completed!
+        Construction time: 402.277 ms
+
+Classify Performance:
+        137490 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000711 s
+        Average classification time: 0.051714 us
+        Throughput: 19.337044 Mpps
+
+Update Performance:
+        1298 rules update: insert_num = 641 delete_num = 657
+        Total update time: 0.000201 s
+        Average update time: 0.154535 us
+        Throughput: 6.471008 Mpps
+-------------------------------
+
+./../ruleslwj/fw3_10k
+./../ruleslwj/fw3_10k_trace
+the number of rules = 1960
+1960
+20009
+class: PSTSS:
+        Construction time: 0.590754 ms
+
+Classify Performance:
+        200090 packets are classified, 0 of them are misclassified
+        Total classification time: 0.007479 s
+        Average classification time: 0.373784 us
+        Throughput: 2.675340 Mpps
+
+Update Performance:
+        1960 rules update: insert_num = 981 delete_num = 979
+        Total update time: 0.000456 s
+        Average update time: 0.232770 us
+        Throughput: 4.296079 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 3.67598 ms
+
+Classify Performance:
+        200090 packets are classified, 0 of them are misclassified
+        Total classification time: 0.007531 s
+        Average classification time: 0.376387 us
+        Throughput: 2.656839 Mpps
+
+Update Performance:
+        1960 rules update: insert_num = 981 delete_num = 979
+        Total update time: 0.000500 s
+        Average update time: 0.255044 us
+        Throughput: 3.920886 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 84281
+[DEBUG] Q-Table update lock contended: 3719
+[DEBUG] Contention ratio: 4.413%
+[DEBUG] Critical total time: 25.781 ms
+[DEBUG] Wait total time: 13.084 ms
+[DEBUG] Avg per critical: 0.306 µs
+Parallel training completed!
+        Construction time: 848.292 ms
+
+Classify Performance:
+        200090 packets are classified, 0 of them are misclassified
+        Total classification time: 0.002508 s
+        Average classification time: 0.125331 us
+        Throughput: 7.978859 Mpps
+
+Update Performance:
+        1960 rules update: insert_num = 981 delete_num = 979
+        Total update time: 0.000508 s
+        Average update time: 0.259289 us
+        Throughput: 3.856704 Mpps
+-------------------------------
+
+./../ruleslwj/fw4_10k
+./../ruleslwj/fw4_10k_trace
+the number of rules = 4726
+4726
+52587
+class: PSTSS:
+        Construction time: 1.59811 ms
+
+Classify Performance:
+        525870 packets are classified, 0 of them are misclassified
+        Total classification time: 0.033119 s
+        Average classification time: 0.629803 us
+        Throughput: 1.587799 Mpps
+
+Update Performance:
+        4726 rules update: insert_num = 2388 delete_num = 2338
+        Total update time: 0.001078 s
+        Average update time: 0.228032 us
+        Throughput: 4.385359 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 9.03526 ms
+
+Classify Performance:
+        525870 packets are classified, 0 of them are misclassified
+        Total classification time: 0.035864 s
+        Average classification time: 0.682002 us
+        Throughput: 1.466271 Mpps
+
+Update Performance:
+        4726 rules update: insert_num = 2388 delete_num = 2338
+        Total update time: 0.001270 s
+        Average update time: 0.268794 us
+        Throughput: 3.720325 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 199606
+[DEBUG] Q-Table update lock contended: 8418
+[DEBUG] Contention ratio: 4.217%
+[DEBUG] Critical total time: 102.335 ms
+[DEBUG] Wait total time: 47.664 ms
+[DEBUG] Avg per critical: 0.513 µs
+Parallel training completed!
+        Construction time: 2403.868 ms
+
+Classify Performance:
+        525870 packets are classified, 0 of them are misclassified
+        Total classification time: 0.002609 s
+        Average classification time: 0.049618 us
+        Throughput: 20.153957 Mpps
+
+Update Performance:
+        4726 rules update: insert_num = 2388 delete_num = 2338
+        Total update time: 0.000611 s
+        Average update time: 0.129361 us
+        Throughput: 7.730306 Mpps
+-------------------------------
+
+./../ruleslwj/fw5_10k
+./../ruleslwj/fw5_10k_trace
+the number of rules = 2189
+2189
+22083
+class: PSTSS:
+        Construction time: 0.715258 ms
+
+Classify Performance:
+        220830 packets are classified, 0 of them are misclassified
+        Total classification time: 0.005041 s
+        Average classification time: 0.228260 us
+        Throughput: 4.380970 Mpps
+
+Update Performance:
+        2189 rules update: insert_num = 1099 delete_num = 1090
+        Total update time: 0.000406 s
+        Average update time: 0.185314 us
+        Throughput: 5.396251 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 3.8718 ms
+
+Classify Performance:
+        220830 packets are classified, 0 of them are misclassified
+        Total classification time: 0.004959 s
+        Average classification time: 0.224556 us
+        Throughput: 4.453228 Mpps
+
+Update Performance:
+        2189 rules update: insert_num = 1099 delete_num = 1090
+        Total update time: 0.000575 s
+        Average update time: 0.262592 us
+        Throughput: 3.808195 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 98680
+[DEBUG] Q-Table update lock contended: 4840
+[DEBUG] Contention ratio: 4.905%
+[DEBUG] Critical total time: 35.910 ms
+[DEBUG] Wait total time: 26.922 ms
+[DEBUG] Avg per critical: 0.364 µs
+Parallel training completed!
+        Construction time: 960.737 ms
+
+Classify Performance:
+        220830 packets are classified, 0 of them are misclassified
+        Total classification time: 0.002331 s
+        Average classification time: 0.105540 us
+        Throughput: 9.475044 Mpps
+
+Update Performance:
+        2189 rules update: insert_num = 1099 delete_num = 1090
+        Total update time: 0.000378 s
+        Average update time: 0.172563 us
+        Throughput: 5.794991 Mpps
+-------------------------------
+
+./../ruleslwj/fw1_100k
+./../ruleslwj/fw1_100k_trace
+the number of rules = 8479
+8479
+85396
+class: PSTSS:
+        Construction time: 3.05524 ms
+
+Classify Performance:
+        853960 packets are classified, 0 of them are misclassified
+        Total classification time: 0.046792 s
+        Average classification time: 0.547937 us
+        Throughput: 1.825028 Mpps
+
+Update Performance:
+        8479 rules update: insert_num = 4313 delete_num = 4166
+        Total update time: 0.002075 s
+        Average update time: 0.244712 us
+        Throughput: 4.086442 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 14.8987 ms
+
+Classify Performance:
+        853960 packets are classified, 0 of them are misclassified
+        Total classification time: 0.049114 s
+        Average classification time: 0.575131 us
+        Throughput: 1.738735 Mpps
+
+Update Performance:
+        8479 rules update: insert_num = 4313 delete_num = 4166
+        Total update time: 0.003086 s
+        Average update time: 0.363922 us
+        Throughput: 2.747842 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 281103
+[DEBUG] Q-Table update lock contended: 7942
+[DEBUG] Contention ratio: 2.825%
+[DEBUG] Critical total time: 135.199 ms
+[DEBUG] Wait total time: 16.943 ms
+[DEBUG] Avg per critical: 0.481 µs
+Parallel training completed!
+        Construction time: 4651.213 ms
+
+Classify Performance:
+        853960 packets are classified, 0 of them are misclassified
+        Total classification time: 0.008018 s
+        Average classification time: 0.093890 us
+        Throughput: 10.650787 Mpps
+
+Update Performance:
+        8479 rules update: insert_num = 4313 delete_num = 4166
+        Total update time: 0.001351 s
+        Average update time: 0.159292 us
+        Throughput: 6.277765 Mpps
+-------------------------------
+
+./../ruleslwj/fw2_100k
+./../ruleslwj/fw2_100k_trace
+the number of rules = 1616
+1616
+18181
+class: PSTSS:
+        Construction time: 0.492776 ms
+
+Classify Performance:
+        181810 packets are classified, 0 of them are misclassified
+        Total classification time: 0.001688 s
+        Average classification time: 0.092818 us
+        Throughput: 10.773718 Mpps
+
+Update Performance:
+        1616 rules update: insert_num = 800 delete_num = 816
+        Total update time: 0.000277 s
+        Average update time: 0.171415 us
+        Throughput: 5.833809 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 2.59091 ms
+
+Classify Performance:
+        181810 packets are classified, 0 of them are misclassified
+        Total classification time: 0.002035 s
+        Average classification time: 0.111925 us
+        Throughput: 8.934518 Mpps
+
+Update Performance:
+        1616 rules update: insert_num = 800 delete_num = 816
+        Total update time: 0.000354 s
+        Average update time: 0.218779 us
+        Throughput: 4.570821 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 93788
+[DEBUG] Q-Table update lock contended: 7503
+[DEBUG] Contention ratio: 8.000%
+[DEBUG] Critical total time: 20.797 ms
+[DEBUG] Wait total time: 13.783 ms
+[DEBUG] Avg per critical: 0.222 µs
+Parallel training completed!
+        Construction time: 514.998 ms
+
+Classify Performance:
+        181810 packets are classified, 0 of them are misclassified
+        Total classification time: 0.000918 s
+        Average classification time: 0.050501 us
+        Throughput: 19.801532 Mpps
+
+Update Performance:
+        1616 rules update: insert_num = 800 delete_num = 816
+        Total update time: 0.000241 s
+        Average update time: 0.149108 us
+        Throughput: 6.706535 Mpps
+-------------------------------
+
+./../ruleslwj/fw3_100k
+./../ruleslwj/fw3_100k_trace
+the number of rules = 2485
+2485
+25110
+class: PSTSS:
+        Construction time: 0.795787 ms
+
+Classify Performance:
+        251100 packets are classified, 0 of them are misclassified
+        Total classification time: 0.013506 s
+        Average classification time: 0.537879 us
+        Throughput: 1.859153 Mpps
+
+Update Performance:
+        2485 rules update: insert_num = 1255 delete_num = 1230
+        Total update time: 0.000768 s
+        Average update time: 0.309184 us
+        Throughput: 3.234317 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 4.44627 ms
+
+Classify Performance:
+        251100 packets are classified, 0 of them are misclassified
+        Total classification time: 0.014896 s
+        Average classification time: 0.593246 us
+        Throughput: 1.685642 Mpps
+
+Update Performance:
+        2485 rules update: insert_num = 1255 delete_num = 1230
+        Total update time: 0.000780 s
+        Average update time: 0.313966 us
+        Throughput: 3.185056 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 119381
+[DEBUG] Q-Table update lock contended: 5897
+[DEBUG] Contention ratio: 4.940%
+[DEBUG] Critical total time: 32.689 ms
+[DEBUG] Wait total time: 8.158 ms
+[DEBUG] Avg per critical: 0.274 µs
+Parallel training completed!
+        Construction time: 1021.278 ms
+
+Classify Performance:
+        251100 packets are classified, 0 of them are misclassified
+        Total classification time: 0.002932 s
+        Average classification time: 0.116768 us
+        Throughput: 8.563961 Mpps
+
+Update Performance:
+        2485 rules update: insert_num = 1255 delete_num = 1230
+        Total update time: 0.000469 s
+        Average update time: 0.188837 us
+        Throughput: 5.295572 Mpps
+-------------------------------
+
+./../ruleslwj/fw4_100k
+./../ruleslwj/fw4_100k_trace
+the number of rules = 19475
+19475
+195019
+class: PSTSS:
+        Construction time: 6.8873 ms
+
+Classify Performance:
+        1950190 packets are classified, 0 of them are misclassified
+        Total classification time: 0.222139 s
+        Average classification time: 1.139064 us
+        Throughput: 0.877914 Mpps
+
+Update Performance:
+        19475 rules update: insert_num = 9868 delete_num = 9607
+        Total update time: 0.011712 s
+        Average update time: 0.601361 us
+        Throughput: 1.662895 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 43.2091 ms
+
+Classify Performance:
+        1950190 packets are classified, 0 of them are misclassified
+        Total classification time: 0.206556 s
+        Average classification time: 1.059158 us
+        Throughput: 0.944146 Mpps
+
+Update Performance:
+        19475 rules update: insert_num = 9868 delete_num = 9607
+        Total update time: 0.013214 s
+        Average update time: 0.678535 us
+        Throughput: 1.473764 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 560364
+[DEBUG] Q-Table update lock contended: 11161
+[DEBUG] Contention ratio: 1.992%
+[DEBUG] Critical total time: 261.726 ms
+[DEBUG] Wait total time: 48.859 ms
+[DEBUG] Avg per critical: 0.467 µs
+Parallel training completed!
+        Construction time: 11691.624 ms
+
+Classify Performance:
+        1950190 packets are classified, 0 of them are misclassified
+        Total classification time: 0.011434 s
+        Average classification time: 0.058628 us
+        Throughput: 17.056725 Mpps
+
+Update Performance:
+        19475 rules update: insert_num = 9868 delete_num = 9607
+        Total update time: 0.003287 s
+        Average update time: 0.168773 us
+        Throughput: 5.925111 Mpps
+-------------------------------
+
+./../ruleslwj/fw5_100k
+./../ruleslwj/fw5_100k_trace
+the number of rules = 6997
+6997
+70100
+class: PSTSS:
+        Construction time: 2.10382 ms
+
+Classify Performance:
+        701000 packets are classified, 0 of them are misclassified
+        Total classification time: 0.034562 s
+        Average classification time: 0.493035 us
+        Throughput: 2.028254 Mpps
+
+Update Performance:
+        6997 rules update: insert_num = 3539 delete_num = 3458
+        Total update time: 0.001862 s
+        Average update time: 0.266143 us
+        Throughput: 3.757376 Mpps
+-------------------------------
+
+class: CutTSS:
+        Construction time: 11.6083 ms
+
+Classify Performance:
+        701000 packets are classified, 0 of them are misclassified
+        Total classification time: 0.034960 s
+        Average classification time: 0.498716 us
+        Throughput: 2.005151 Mpps
+
+Update Performance:
+        6997 rules update: insert_num = 3539 delete_num = 3458
+        Total update time: 0.002058 s
+        Average update time: 0.294095 us
+        Throughput: 3.400263 Mpps
+-------------------------------
+
+class: HybridTSS:
+Starting parallel training with 20 threads...
+Training finish 10% ...............Remaining: 90%
+Training finish 20% ...............Remaining: 80%
+Training finish 30% ...............Remaining: 70%
+Training finish 40% ...............Remaining: 60%
+Training finish 50% ...............Remaining: 50%
+Training finish 60% ...............Remaining: 40%
+Training finish 70% ...............Remaining: 30%
+Training finish 80% ...............Remaining: 20%
+Training finish 90% ...............Remaining: 10%
+[DEBUG] Q-Table update lock attempts: 226768
+[DEBUG] Q-Table update lock contended: 6656
+[DEBUG] Contention ratio: 2.935%
+[DEBUG] Critical total time: 125.126 ms
+[DEBUG] Wait total time: 18.716 ms
+[DEBUG] Avg per critical: 0.552 µs
+Parallel training completed!
+        Construction time: 4105.952 ms
+
+Classify Performance:
+        701000 packets are classified, 0 of them are misclassified
+        Total classification time: 0.009538 s
+        Average classification time: 0.136067 us
+        Throughput: 7.349298 Mpps
+
+Update Performance:
+        6997 rules update: insert_num = 3539 delete_num = 3458
+        Total update time: 0.001404 s
+        Average update time: 0.200606 us
+        Throughput: 4.984893 Mpps
+-------------------------------
+
+Namespace(mode='AllRule', make=False)
+./main -r ./../ruleslwj/acl1_1k -p ./../ruleslwj/acl1_1k_trace
+./main -r ./../ruleslwj/acl2_1k -p ./../ruleslwj/acl2_1k_trace
+./main -r ./../ruleslwj/acl3_1k -p ./../ruleslwj/acl3_1k_trace
+./main -r ./../ruleslwj/acl4_1k -p ./../ruleslwj/acl4_1k_trace
+./main -r ./../ruleslwj/acl5_1k -p ./../ruleslwj/acl5_1k_trace
+./main -r ./../ruleslwj/acl1_10k -p ./../ruleslwj/acl1_10k_trace
+./main -r ./../ruleslwj/acl2_10k -p ./../ruleslwj/acl2_10k_trace
+./main -r ./../ruleslwj/acl3_10k -p ./../ruleslwj/acl3_10k_trace
+./main -r ./../ruleslwj/acl4_10k -p ./../ruleslwj/acl4_10k_trace
+./main -r ./../ruleslwj/acl5_10k -p ./../ruleslwj/acl5_10k_trace
+./main -r ./../ruleslwj/acl1_100k -p ./../ruleslwj/acl1_100k_trace
+./main -r ./../ruleslwj/acl2_100k -p ./../ruleslwj/acl2_100k_trace
+./main -r ./../ruleslwj/acl3_100k -p ./../ruleslwj/acl3_100k_trace
+./main -r ./../ruleslwj/acl4_100k -p ./../ruleslwj/acl4_100k_trace
+./main -r ./../ruleslwj/acl5_100k -p ./../ruleslwj/acl5_100k_trace
+./main -r ./../ruleslwj/ipc1_1k -p ./../ruleslwj/ipc1_1k_trace
+./main -r ./../ruleslwj/ipc2_1k -p ./../ruleslwj/ipc2_1k_trace
+Not exist
+Not exist
+Not exist
+./main -r ./../ruleslwj/ipc1_10k -p ./../ruleslwj/ipc1_10k_trace
+./main -r ./../ruleslwj/ipc2_10k -p ./../ruleslwj/ipc2_10k_trace
+Not exist
+Not exist
+Not exist
+./main -r ./../ruleslwj/ipc1_100k -p ./../ruleslwj/ipc1_100k_trace
+./main -r ./../ruleslwj/ipc2_100k -p ./../ruleslwj/ipc2_100k_trace
+Not exist
+Not exist
+Not exist
+./main -r ./../ruleslwj/fw1_1k -p ./../ruleslwj/fw1_1k_trace
+./main -r ./../ruleslwj/fw2_1k -p ./../ruleslwj/fw2_1k_trace
+./main -r ./../ruleslwj/fw3_1k -p ./../ruleslwj/fw3_1k_trace
+./main -r ./../ruleslwj/fw4_1k -p ./../ruleslwj/fw4_1k_trace
+./main -r ./../ruleslwj/fw5_1k -p ./../ruleslwj/fw5_1k_trace
+./main -r ./../ruleslwj/fw1_10k -p ./../ruleslwj/fw1_10k_trace
+./main -r ./../ruleslwj/fw2_10k -p ./../ruleslwj/fw2_10k_trace
+./main -r ./../ruleslwj/fw3_10k -p ./../ruleslwj/fw3_10k_trace
+./main -r ./../ruleslwj/fw4_10k -p ./../ruleslwj/fw4_10k_trace
+./main -r ./../ruleslwj/fw5_10k -p ./../ruleslwj/fw5_10k_trace
+./main -r ./../ruleslwj/fw1_100k -p ./../ruleslwj/fw1_100k_trace
+./main -r ./../ruleslwj/fw2_100k -p ./../ruleslwj/fw2_100k_trace
+./main -r ./../ruleslwj/fw3_100k -p ./../ruleslwj/fw3_100k_trace
+./main -r ./../ruleslwj/fw4_100k -p ./../ruleslwj/fw4_100k_trace
+./main -r ./../ruleslwj/fw5_100k -p ./../ruleslwj/fw5_100k_trace
+nooe@DESKTOP-2QESDOG:~/Documents/_paper/q_table_conte

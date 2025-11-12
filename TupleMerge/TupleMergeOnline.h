@@ -29,11 +29,11 @@
 #include "SlottedTable.h"
 
 namespace ForgeUtils {
-    void Crazify(TupleMergeUtils::TupleTable& tuple);
+void Crazify(TupleMergeUtils::TupleTable& tuple);
 }
 
 class TupleMergeOnline : public PacketClassifier {
-public:
+  public:
     TupleMergeOnline(int c = 10);
     TupleMergeOnline(const std::unordered_map<std::string, std::string>& args);
     ~TupleMergeOnline();
@@ -61,26 +61,30 @@ public:
         }*/
         return cost;
     }
-    virtual size_t NumTables() const { return tables.size(); }
-    virtual size_t RulesInTable(size_t index) const { return tables[index]->NumRules(); }
+    virtual size_t NumTables() const {
+        return tables.size();
+    }
+    virtual size_t RulesInTable(size_t index) const {
+        return tables[index]->NumRules();
+    }
     virtual size_t PriorityOfTable(size_t index) const {
         return tables[index]->MaxPriority();
     }
-    void prints(){
+    void prints() {
         double memSize = double(MemSizeBytes());
         int numRules = rules.size();
         printf("\trules: %d \n", numRules);
         printf("\ttuples: %ld \n", NumTables());
-        printf("\tSize(KB): %f", memSize/1024);
+        printf("\tSize(KB): %f", memSize / 1024);
         printf("\tByte/rule: %f \n", memSize / numRules);
-//		printDataStruct();
-//		for(Rule r : rules){
-//		    std::cout<<r.id<<"\t";
-//		}
-//		std::cout<<std::endl;
+        //		printDataStruct();
+        //		for(Rule r : rules){
+        //		    std::cout<<r.id<<"\t";
+        //		}
+        //		std::cout<<std::endl;
     }
-    void printDataStruct(){
-        for(auto table : tables){
+    void printDataStruct() {
+        for (auto table : tables) {
             table->prints();
         }
     }
@@ -88,8 +92,7 @@ public:
         return "class: TupleMerge";
     }
 
-
-public:
+  public:
     void Resort() {
         sort(tables.begin(), tables.end(), [](SlottedTable*& tx, SlottedTable*& ty) { return tx->MaxPriority() > ty->MaxPriority(); });
     }
@@ -101,8 +104,4 @@ public:
     std::vector<Rule> rules;
 
     int collideLimit;
-
 };
-
-
-

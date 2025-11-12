@@ -1,5 +1,15 @@
 #include "HybridTSS.h"
 #include <omp.h>  // 使用 OpenMP 多線程
+#include <atomic>
+#include <algorithm>
+
+
+// #define DEBUG
+// #define DEBUG_NODE
+#include <fstream>
+#include <iomanip>
+
+
 HybridTSS::HybridTSS() {
     binth = 8;
 }
@@ -11,6 +21,7 @@ HybridTSS::HybridTSS() {
 // -----------------------------------------------------------------------------
 void HybridTSS::ConstructClassifier(const vector<Rule> &rules) {
     train(rules);
+
     root = new SubHybridTSS(rules);
     queue<SubHybridTSS*> que;
     que.push(root);
@@ -33,13 +44,59 @@ void HybridTSS::ConstructClassifier(const vector<Rule> &rules) {
             }
         }
     }
-    vector<vector<int> > reward = root->getReward();
+    // vector<vector<int> > reward = root->getReward();
+
+// #ifdef DEBUG
+//     // 將 QTable 前 N 個 state/action 儲存到檔案
+//     ofstream fout("debug_QTable.txt");
+//     if (fout.is_open()) {
+//         fout << fixed << setprecision(6);
+//         int stateCount = 0;
+//         for (int s = 0; s < QTable.size() && stateCount < 50; ++s) { // 只輸出前 50 個 state
+//             for (int a = 0; a < QTable[s].size(); ++a) {
+//                 if (QTable[s][a] != 0) {
+//                     fout << "state:" << s << "\taction:" << a << "\treward:" << QTable[s][a] << endl;
+//                 }
+//             }
+//             stateCount++;
+//         }
+//         fout.close();
+//     }
+
+//     // 將節點 reward 儲存到檔案
+//     auto reward = root->getReward();
+//     fout.open("debug_reward.txt");
+//     if (fout.is_open()) {
+//         for (auto &r : reward) {
+//             fout << "state:" << r[0] << "\taction:" << r[1] << "\treward:" << r[2] << endl;
+//         }
+//         fout.close();
+//     }
+// #endif
+
+#ifdef DEBUG
+    // 訓練完成後：印出整棵樹資訊，存入 debug_tree.txt
+    std::ofstream fout("debug_tree.txt", std::ios::app);
+    if (fout.is_open()) {
+        // 暫時重導 cout -> fout
+        std::streambuf *old_buf = std::cout.rdbuf(fout.rdbuf());
+        std::cout << "========== HybridTSS Tree Debug Info ==========" << std::endl;
+
+        // 呼叫原本的 printInfo()，不改任何底層
+        printInfo();
+
+        std::cout << "========== End of Tree Info ==========" << std::endl;
+        // 還原 cout
+        std::cout.rdbuf(old_buf);
+        fout.close();
+    }
+#endif
 }
 
 // -----------------------------------------------------------------------------
 // func name: ClassifyAPacket
 // description: 根据packet查询相应匹配的规则
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 int HybridTSS::ClassifyAPacket(const Packet &packet) {
     return root->ClassifyAPacket(packet);
@@ -48,7 +105,7 @@ int HybridTSS::ClassifyAPacket(const Packet &packet) {
 // -----------------------------------------------------------------------------
 // func name: DeleteRule
 // description: 删除相应的规则
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 void HybridTSS::DeleteRule(const Rule &rule) {
     root->DeleteRule(rule);
@@ -58,7 +115,7 @@ void HybridTSS::DeleteRule(const Rule &rule) {
 // -----------------------------------------------------------------------------
 // func name: InsertRule
 // description: 插入相应的规则
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 void HybridTSS::InsertRule(const Rule &rule) {
     root->InsertRule(rule);
@@ -67,7 +124,7 @@ void HybridTSS::InsertRule(const Rule &rule) {
 // -----------------------------------------------------------------------------
 // func name: MemSizeBytes
 // description: 计算相应结构整体的Memory
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 Memory HybridTSS::MemSizeBytes() const {
     return root->MemSizeBytes();
@@ -114,7 +171,7 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
         cout << "state node exist" << endl;
         exit(-1);
     }
-    
+
     // Greedy for linear, TM,
     int s = state->getState();
     vector<Rule> nodeRules = state->getRules();
@@ -147,7 +204,7 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
         }
         return {TM, -1, -1};
     }
-    
+
     // 记录所有action
     vector<vector<int> > Actions;
     // 记录每个action对应的reward， 结构冗余待优化
@@ -194,7 +251,7 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
 // -----------------------------------------------------------------------------
 // func name: ConstructBaseline
 // description: 构造baseline结构
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 void HybridTSS::ConstructBaseline(const vector<Rule> &rules) {
     root = new SubHybridTSS(rules);
@@ -255,92 +312,194 @@ string int2str(int x, int len) {
 
 // -----------------------------------------------------------------------------
 // func name: train
-// description: 训练并获得QTable
-// detail: 对于每个节点使用getAction获得下一步策略，直到构建完成，获得每一步的返回值，
-//         对于每一步的State和Action更新Q表
-// To-do: 方法构建HybridTSS方式过于冗余，待优化，训练次数与结束条件待优化
+// description: (重構後) 高效能並行訓練 Q-Table
+// detail: 採用 Thread-local Q-Table 避免鎖競爭，物件重用避免記憶體開銷，
+//         並在最後階段高效地合併 Q-Table。
 // -----------------------------------------------------------------------------
+
+
+// ------------------------------------------------------------
+// Utility: 狀態-動作編碼壓縮為 key
+// ------------------------------------------------------------
+using Key = uint64_t; // key = (state << 6) | action
+inline Key make_key(int s, int a) { return (static_cast<Key>(s) << 6) | (a & 0x3F); }
+inline int key_state(Key k) { return static_cast<int>(k >> 6); }
+inline int key_action(Key k) { return static_cast<int>(k & 0x3F); }
+
+// ------------------------------------------------------------
+// 主訓練函式 (快速收斂版 + DEBUG學習曲線)
+// ------------------------------------------------------------
 void HybridTSS::train(const vector<Rule> &rules) {
+
     cout << "Starting parallel training with " << omp_get_max_threads() << " threads..." << endl;
-    
-    int stateSize = 1 << 20, actionSize = 1 << 6;
-    QTable.resize(stateSize, vector<double>(actionSize, 0.0));
-    
-    // 減少訓練次數以測試並行效果
-    uint32_t loopNum = 1000;  // 從 10000 減少到 1000
-    int trainRate = 10;
-    
-    // 為每個線程準備獨立的隨機數種子
+
+    const int stateSize = 1 << 20;
+    const int actionSize = 1 << 6;
+    const int loopNum = 50;      // 減少以便測試
+    const int progressStep = 10;
+    const double lr = 0.05;         // 初始 learning rate
+    const double decay = 0.001;    // learning rate 衰減係數
+
+    const double epsilon0 = 0.5;
+    const double epsilonMin = 0.01;
+    const double epsilonDecay = 0.003;
+
+#ifdef DEBUG
+    vector<double> rewardCurve(loopNum, 0.0);
+#endif
+
+    QTable.assign(stateSize, vector<double>(actionSize, 0.0));
+
+    int numThreads = omp_get_max_threads();
+    vector<unordered_map<Key, double>> localQ(numThreads);
+    vector<unordered_map<Key, int>> localCount(numThreads);
+    for (auto &m : localQ) m.reserve(1 << 16);
+    for (auto &m : localCount) m.reserve(1 << 16);
+
+    atomic<int> progressCounter(0);
+    atomic<int> nextPrint(progressStep);
+
+#ifdef DEBUG
+    std::atomic<long long> lockAttempts{0};
+    std::atomic<long long> lockContended{0};
+    omp_lock_t qLock;
+    omp_init_lock(&qLock);
+#endif
+
     #pragma omp parallel
     {
-        int thread_id = omp_get_thread_num();
-        srand(time(NULL) + thread_id);
+        int tid = omp_get_thread_num();
+        auto &Qlocal = localQ[tid];
+        auto &countLocal = localCount[tid];
+
+        std::mt19937 gen(static_cast<unsigned>(
+            std::chrono::high_resolution_clock::now().time_since_epoch().count()) ^ (tid * 131071u));
+
+        SubHybridTSS root(rules);
+
+        for (int i = tid; i < loopNum; i += numThreads) {
+
+            double epsilon = std::max(epsilonMin, epsilon0 * exp(-epsilonDecay * i));
+
+            int done = ++progressCounter;
+            if (done * 100 / loopNum >= nextPrint.load()) {
+                #pragma omp critical
+                {
+                    if (done * 100 / loopNum >= nextPrint.load()) {
+                        cout << "Training " << nextPrint.load() << "% completed..." << endl;
+                        nextPrint.store(nextPrint.load() + progressStep);
+                    }
+                }
+            }
+
+            root.reset();
+
+            queue<SubHybridTSS*> que;
+            que.push(&root);
+
+            while (!que.empty()) {
+                SubHybridTSS *node = que.front(); que.pop();
+                vector<int> op = getAction(node, epsilon * 100.0);
+                for (auto *child : node->ConstructClassifier(op, "train")) {
+                    if (child) que.push(child);
+                }
+            }
+
+            auto rewards = root.getReward();
+
+#ifdef DEBUG
+            double episodeReward = 0.0;
+#endif
+
+            // thread-local Q-table 更新
+            for (auto &r : rewards) {
+                if ((r[1] >> 6) != 3) continue;
+                int s = r[0];
+                int a = r[1] & 63;
+                double val = tanh(r[2] / 100.0);
+                Key k = make_key(s, a);
+
+                int &count = countLocal[k];
+                double alpha = lr / (1.0 + decay * count);
+                count++;
+
+                auto it = Qlocal.find(k);
+                if (it == Qlocal.end()) {
+                    Qlocal[k] = val;
+                } else {
+                    it->second += alpha * (val - it->second);
+                }
+
+#ifdef DEBUG
+                episodeReward += val;
+#endif
+            }
+
+#ifdef DEBUG
+            if (i == 0)
+                rewardCurve[i] = episodeReward;
+            else
+                rewardCurve[i] = rewardCurve[i-1] + (episodeReward - rewardCurve[i-1]) / (i+1);
+#endif
+        }
     }
-    
-    // **關鍵並行化：並行執行訓練迴圈**
-    #pragma omp parallel for schedule(dynamic, 10) shared(trainRate)
-    for (int i = 0; i < loopNum; i++) {
-        
-        // 線程安全的進度顯示
-        if (i >= loopNum / 10 && i % (loopNum / 10) == 0) {
+
+    cout << "Training finished, merging local Q-tables..." << endl;
+
+    vector<vector<int>> QCount(stateSize, vector<int>(actionSize, 0));
+
+    #pragma omp parallel for schedule(static)
+    for (int t = 0; t < numThreads; ++t) {
+        for (const auto& [key, value] : localQ[t]) {
+            int s = key_state(key);
+            int a = key_action(key);
+            int c = localCount[t][key];
+
+#ifdef DEBUG
+            lockAttempts++;
+            if (!omp_test_lock(&qLock)) {
+                lockContended++;
+                omp_set_lock(&qLock);
+            }
+#endif
             #pragma omp critical
             {
-                std::cout << "Training finish " << trainRate << "% ...............Remaining: " 
-                         << 100 - trainRate << "%" << std::endl;
-                trainRate += 10;
+                QTable[s][a] = (QTable[s][a] * QCount[s][a] + value * c) / (QCount[s][a] + c);
+                QCount[s][a] += c;
             }
+#ifdef DEBUG
+            omp_unset_lock(&qLock);
+#endif
         }
-        
-        // 每個線程獨立建構 classifier
-        auto *tmpRoot = new SubHybridTSS(rules);
-        queue<SubHybridTSS*> que;
-        que.push(tmpRoot);
-        
-        while (!que.empty()) {
-            SubHybridTSS* node = que.front();
-            que.pop();
-            vector<int> op = getAction(node, 50);
-            vector<SubHybridTSS*> children = node->ConstructClassifier(op, "train");
-            for (auto iter : children) {
-                if (iter) {
-                    que.push(iter);
-                }
-            }
-        }
-
-        // 獲得 reward
-        vector<vector<int> > reward = tmpRoot->getReward();
-        
-        // **關鍵：線程安全的 Q 表更新**
-        #pragma omp critical(qtable_update)
-        {
-            for (auto iter : reward) {
-                if ((iter[1] >> 6) != 3) {
-                    continue;
-                }
-                int s = iter[0], a = iter[1] & ((1 << 6) - 1), r = iter[2];
-                double lr = 0.1;
-                if (QTable[s][a] == 0) {
-                    QTable[s][a] = r;
-                } else {
-                    QTable[s][a] += lr * (r - QTable[s][a]);
-                }
-            }
-        }
-        
-        // 清理記憶體
-        tmpRoot->recurDelete();
-        delete tmpRoot;
     }
-    
-    cout << "Parallel training completed!" << endl;
+
+#ifdef DEBUG
+    omp_destroy_lock(&qLock);
+    cout << "[DEBUG] Lock Attempts: " << lockAttempts << endl;
+    cout << "[DEBUG] Lock Contended: " << lockContended << endl;
+    cout << "[DEBUG] Contention Ratio: "
+         << (double)lockContended / lockAttempts * 100.0 << "%" << endl;
+
+    cout << "Saving learning curve to learning_curve.csv ..." << endl;
+    ofstream fout("learning_curve.csv");
+    for (int i = 0; i < loopNum; i++) {
+        fout << i << "," << rewardCurve[i] << "\n";
+    }
+    fout.close();
+    cout << "Learning curve export finished" << endl;
+#endif
+
+    cout << "Parallel training completed successfully!" << endl;
 }
+
 
 // -----------------------------------------------------------------------------
 // func name: printInfo
 // description: 打印函数信息
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 void HybridTSS::printInfo() {
+#ifdef DEBUG_NODE
     root->printInfo();
+#endif
 }

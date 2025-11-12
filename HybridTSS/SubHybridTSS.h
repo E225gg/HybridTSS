@@ -42,8 +42,9 @@ public:
     void FindRule(const Rule &rule);
     void FindPacket(const Packet &p);
 
-    // RAII
+    // RAII and Reset
     void recurDelete();
+    void reset(); // <--- 新增 reset 方法的宣告
 
     int nodeId;
     vector<int> bigOffset;

@@ -29,7 +29,8 @@ using namespace TupleMergeUtils;
 
 bool AreEqual(TupleTable t1, TupleTable t2) {
     for (size_t d = 0; d < t1.size(); d++) {
-        if (t1[d] != t2[d]) return false;
+        if (t1[d] != t2[d])
+            return false;
     }
     return true;
 }
@@ -44,23 +45,28 @@ void ForgeUtils::Crazify(TupleTable& tuple) {
     if (tuple[FieldSA] > tuple[FieldDA] + 4) {
         tuple[FieldDA] = 0;
         tuple[FieldDP] = 16;
-    }
-    else if (tuple[FieldDA] > tuple[FieldSA] + 4) {
+    } else if (tuple[FieldDA] > tuple[FieldSA] + 4) {
         tuple[FieldSA] = 0;
         tuple[FieldSP] = 16;
     }
 
+    if (tuple[FieldSA] == 32)
+        tuple[FieldSA] -= 4;
+    else if (tuple[FieldSA] > 24)
+        tuple[FieldSA] -= 3;
+    else if (tuple[FieldSA] > 16)
+        tuple[FieldSA] -= 2;
+    else if (tuple[FieldSA] > 8)
+        tuple[FieldSA] -= 1;
 
-    if (tuple[FieldSA] == 32) tuple[FieldSA] -= 4;
-    else if (tuple[FieldSA] > 24) tuple[FieldSA] -= 3;
-    else if (tuple[FieldSA] > 16) tuple[FieldSA] -= 2;
-    else if (tuple[FieldSA] > 8) tuple[FieldSA] -= 1;
-
-    if (tuple[FieldDA] == 32) tuple[FieldDA] -= 4;
-    else if (tuple[FieldDA] > 24) tuple[FieldDA] -= 3;
-    else if (tuple[FieldDA] > 16) tuple[FieldDA] -= 2;
-    else if (tuple[FieldDA] > 8) tuple[FieldDA] -= 1;
-
+    if (tuple[FieldDA] == 32)
+        tuple[FieldDA] -= 4;
+    else if (tuple[FieldDA] > 24)
+        tuple[FieldDA] -= 3;
+    else if (tuple[FieldDA] > 16)
+        tuple[FieldDA] -= 2;
+    else if (tuple[FieldDA] > 8)
+        tuple[FieldDA] -= 1;
 }
 
 size_t CollisionsForTuple(const std::vector<Rule>& rules, const TupleTable& tuple) {
@@ -77,14 +83,13 @@ size_t CollisionsForTuple(const std::vector<Rule>& rules, const TupleTable& tupl
 // ************
 // TupleMergeOnline
 // ************
-TupleMergeOnline::TupleMergeOnline(int c)
-{
+TupleMergeOnline::TupleMergeOnline(int c) {
     collideLimit = c;
     collideLimit = 40;
 }
 
 TupleMergeOnline::TupleMergeOnline(const std::unordered_map<std::string, std::string>& args)
-        : collideLimit(GetIntOrElse(args, "TM.Limit.Collide", 10)) {
+    : collideLimit(GetIntOrElse(args, "TM.Limit.Collide", 10)) {
 }
 
 TupleMergeOnline::~TupleMergeOnline() {
@@ -102,7 +107,7 @@ void TupleMergeOnline::ConstructClassifier(const std::vector<Rule>& rules) {
 int TupleMergeOnline::ClassifyAPacket(const Packet& p) {
     int prior = -1;
     int q = 0;
-    for (auto & t : tables) {
+    for (auto& t : tables) {
         if (t->MaxPriority() > prior) {
             prior = max(prior, t->ClassifyAPacket(p));
             q++;
@@ -111,8 +116,7 @@ int TupleMergeOnline::ClassifyAPacket(const Packet& p) {
     QueryUpdate(q);
     return prior;
 }
-void TupleMergeOnline::DeleteRule(const Rule& rule)
-{
+void TupleMergeOnline::DeleteRule(const Rule& rule) {
     SlottedTable* tbl = assignments[rule.priority];
     assignments.erase(rule.priority);
 
@@ -128,7 +132,7 @@ void TupleMergeOnline::DeleteRule(const Rule& rule)
         Resort();
     }
 }
-void TupleMergeOnline::DeleteRule(size_t index){
+void TupleMergeOnline::DeleteRule(size_t index) {
     Rule r = rules[index];
     rules[index] = rules[rules.size() - 1];
     rules.pop_back();
@@ -160,15 +164,23 @@ void Relax(TupleTable& tuple) {
         tuple[FieldDP] = 16;
     }
 
-    if (tuple[FieldSA] == 32) tuple[FieldSA] -= 4;
-    else if (tuple[FieldSA] > 24) tuple[FieldSA] -= 3;
-    else if (tuple[FieldSA] > 16) tuple[FieldSA] -= 2;
-    else if (tuple[FieldSA] > 8) tuple[FieldSA] -= 1;
+    if (tuple[FieldSA] == 32)
+        tuple[FieldSA] -= 4;
+    else if (tuple[FieldSA] > 24)
+        tuple[FieldSA] -= 3;
+    else if (tuple[FieldSA] > 16)
+        tuple[FieldSA] -= 2;
+    else if (tuple[FieldSA] > 8)
+        tuple[FieldSA] -= 1;
 
-    if (tuple[FieldDA] == 32) tuple[FieldDA] -= 4;
-    else if (tuple[FieldDA] > 24) tuple[FieldDA] -= 3;
-    else if (tuple[FieldDA] > 16) tuple[FieldDA] -= 2;
-    else if (tuple[FieldDA] > 8) tuple[FieldDA] -= 1;
+    if (tuple[FieldDA] == 32)
+        tuple[FieldDA] -= 4;
+    else if (tuple[FieldDA] > 24)
+        tuple[FieldDA] -= 3;
+    else if (tuple[FieldDA] > 16)
+        tuple[FieldDA] -= 2;
+    else if (tuple[FieldDA] > 8)
+        tuple[FieldDA] -= 1;
 }
 
 void TupleMergeOnline::InsertRule(const Rule& rule) {
@@ -208,7 +220,7 @@ void TupleMergeOnline::InsertRule(const Rule& rule) {
                 }
                 compatTuple[bestD] = (superTuple[bestD] + compatTuple[bestD]) / 2;
 
-//				for(int i = 0; i < )
+                //				for(int i = 0; i < )
                 SlottedTable* target = FindOrMake(compatTuple);
 
                 vector<Rule> rl = table->GetRules();
@@ -234,7 +246,7 @@ void TupleMergeOnline::InsertRule(const Rule& rule) {
     {
         bool ignore;
         Relax(tuple);
-        SlottedTable * table = new SlottedTable(tuple);
+        SlottedTable* table = new SlottedTable(tuple);
         table->Insertion(rule, ignore);
         tables.push_back(table);
         assignments[rule.priority] = table;

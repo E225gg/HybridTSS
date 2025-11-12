@@ -21,37 +21,48 @@ unordered_map<string, string> ParseArgs(int argc, char* argv[]) {
     return results;
 }
 
-const string& GetOrElse(const unordered_map<string, string> &m, const string& key, const string& def) {
-    if (m.find(key) == m.end()) return def;
-    else return m.at(key);
+const string& GetOrElse(const unordered_map<string, string>& m, const string& key, const string& def) {
+    if (m.find(key) == m.end())
+        return def;
+    else
+        return m.at(key);
 }
 
-bool GetBoolOrElse(const unordered_map<string, string> &m, const string& key, bool def) {
-    if (m.find(key) == m.end()) return def;
+bool GetBoolOrElse(const unordered_map<string, string>& m, const string& key, bool def) {
+    if (m.find(key) == m.end())
+        return def;
     else {
         string s = m.at(key);
-        if (s == "true") return 1;
-        else if (s == "false") return 0;
+        if (s == "true")
+            return 1;
+        else if (s == "false")
+            return 0;
         return std::stoi(m.at(key)) != 0;
     }
 }
 
-int GetIntOrElse(const unordered_map<string, string> &m, const string& key, int def) {
-    if (m.find(key) == m.end()) return def;
-    else return std::stoi(m.at(key));
+int GetIntOrElse(const unordered_map<string, string>& m, const string& key, int def) {
+    if (m.find(key) == m.end())
+        return def;
+    else
+        return std::stoi(m.at(key));
 }
 
-unsigned int GetUIntOrElse(const unordered_map<string, string> &m, const string& key, unsigned int def) {
-    if (m.find(key) == m.end()) return def;
-    else return std::stoul(m.at(key));
+unsigned int GetUIntOrElse(const unordered_map<string, string>& m, const string& key, unsigned int def) {
+    if (m.find(key) == m.end())
+        return def;
+    else
+        return std::stoul(m.at(key));
 }
 
-double GetDoubleOrElse(const unordered_map<string, string> &m, const string& key, double def) {
-    if (m.find(key) == m.end()) return def;
-    else return std::stod(m.at(key));
+double GetDoubleOrElse(const unordered_map<string, string>& m, const string& key, double def) {
+    if (m.find(key) == m.end())
+        return def;
+    else
+        return std::stod(m.at(key));
 }
 
-void Split(const string &s, char delim, vector<string>& tokens) {
+void Split(const string& s, char delim, vector<string>& tokens) {
     stringstream ss(s);
     string item;
     while (getline(ss, item, delim)) {

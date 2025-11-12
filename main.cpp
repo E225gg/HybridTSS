@@ -122,8 +122,8 @@ int main(int argc, char* argv[]) {
 
     // ---HybridTSS---Construction---
 //    PacketClassifier *HT = new HybridTSS();
-    PacketClassifier *TMO = new TupleMergeOnline();
-    testPerformance(TMO);
+    // PacketClassifier *TMO = new TupleMergeOnline();
+    // testPerformance(TMO);
     PacketClassifier *PSTSS = new PriorityTupleSpaceSearch();
     testPerformance(PSTSS);
     PacketClassifier *CT = new CutTSS();

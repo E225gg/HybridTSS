@@ -1,5 +1,5 @@
-#ifndef  TUPLE_H
-#define  TUPLE_H
+#ifndef TUPLE_H
+#define TUPLE_H
 
 #define POINTER_SIZE_BYTES 4
 
@@ -11,7 +11,7 @@
 #include "MapExtensions.h"
 
 struct Tuple {
-public:
+  public:
     Tuple(const std::vector<int>& dims, const std::vector<unsigned int>& lengths, const Rule& r) : dims(dims), lengths(lengths) {
         for (int w : lengths) {
             tuple.push_back(w);
@@ -24,30 +24,33 @@ public:
         cmap_destroy(&map_in_tuple);
     }
 
-    bool IsEmpty() { return CountNumRules() == 0; }
+    bool IsEmpty() {
+        return CountNumRules() == 0;
+    }
 
     int FindMatchPacket(const Packet& p);
     void Insertion(const Rule& r);
     void Deletion(const Rule& r);
     int WorstAccesses() const;
-    int CountNumRules() const  {
+    int CountNumRules() const {
         return cmap_count(&map_in_tuple);
         //	return  table.size();
     }
     Memory MemSizeBytes(Memory ruleSizeBytes) const {
-        return 	cmap_count(&map_in_tuple)* ruleSizeBytes + cmap_array_size(&map_in_tuple) * POINTER_SIZE_BYTES;
-        //return table.size() * ruleSizeBytes + table.bucket_count() * POINTER_SIZE_BYTES;
+        return cmap_count(&map_in_tuple) * ruleSizeBytes + cmap_array_size(&map_in_tuple) * POINTER_SIZE_BYTES;
+        // return table.size() * ruleSizeBytes + table.bucket_count() * POINTER_SIZE_BYTES;
     }
 
     void printsipdip() {
-        //printf("sipdip: %d %d\n", sip_length, dip_length);
+        // printf("sipdip: %d %d\n", sip_length, dip_length);
     }
-protected:
+
+  protected:
     bool inline IsPacketMatchToRule(const Packet& p, const Rule& r);
     unsigned int inline HashRule(const Rule& r) const;
     unsigned int inline HashPacket(const Packet& p) const;
     cmap map_in_tuple;
-    //std::unordered_map<uint32_t, std::vector<Rule>> table;
+    // std::unordered_map<uint32_t, std::vector<Rule>> table;
 
     std::vector<int> dims;
     std::vector<unsigned int> lengths;
@@ -55,8 +58,8 @@ protected:
 };
 
 struct PriorityTuple : public Tuple {
-public:
-    PriorityTuple(const std::vector<int>& dims, const std::vector<unsigned int>& lengths, const Rule& r) :Tuple(dims, lengths, r){
+  public:
+    PriorityTuple(const std::vector<int>& dims, const std::vector<unsigned int>& lengths, const Rule& r) : Tuple(dims, lengths, r) {
         maxPriority = r.priority;
         priority_container.insert(maxPriority);
     }
@@ -67,10 +70,9 @@ public:
     std::multiset<int> priority_container;
 };
 
-
 class TupleSpaceSearch : public PacketClassifier {
 
-public:
+  public:
     virtual ~TupleSpaceSearch() {
         for (auto p : all_tuples) {
             p.second.Destroy();
@@ -96,7 +98,7 @@ public:
     }
     void PlotTupleDistribution() {
 
-        std::vector<std::pair<unsigned int, Tuple> > v;
+        std::vector<std::pair<unsigned int, Tuple>> v;
         copy(all_tuples.begin(), all_tuples.end(), back_inserter(v));
 
         auto cmp = [](const std::pair<unsigned int, Tuple>& lhs, const std::pair<unsigned int, Tuple>& rhs) {
@@ -114,16 +116,21 @@ public:
         for (auto x : v) {
             log << x.second.CountNumRules() << " ";
             left--;
-            if (left <= 0) break;
+            if (left <= 0)
+                break;
         }
         log << std::endl;
     }
     virtual int GetNumberOfTuples() const {
         return all_tuples.size();
     }
-    size_t NumTables() const { return GetNumberOfTuples(); }
-    size_t RulesInTable(size_t index) const { return 0; } // TODO : assign some order
-protected:
+    size_t NumTables() const {
+        return GetNumberOfTuples();
+    }
+    size_t RulesInTable(size_t index) const {
+        return 0;
+    } // TODO : assign some order
+  protected:
     uint64_t inline KeyRulePrefix(const Rule& r) {
         int key = 0;
         for (int d : dims) {
@@ -133,14 +140,14 @@ protected:
         return key;
     }
     std::unordered_map<uint64_t, Tuple> all_tuples;
-    //maintain rules for monitoring purpose
+    // maintain rules for monitoring purpose
     std::vector<Rule> rules;
     std::vector<int> dims;
 };
 
 class PriorityTupleSpaceSearch : public TupleSpaceSearch {
 
-public:
+  public:
     int ClassifyAPacket(const Packet& one_packet);
     void DeleteRule(const Rule& rule);
     void InsertRule(const Rule& one_rule);
@@ -151,7 +158,7 @@ public:
         for (auto& tuple : priority_tuples_vector) {
             sizeBytes += tuple->MemSizeBytes(ruleSizeBytes);
         }
-        return sizeBytes + rules.size()*16;
+        return sizeBytes + rules.size() * 16;
     }
 
     int GetNumberOfTuples() const {
@@ -170,36 +177,38 @@ public:
         for (auto x : priority_tuples_vector) {
             log << x->CountNumRules() << " ";
             left--;
-            if (left <= 0) break;
+            if (left <= 0)
+                break;
         }
         log << std::endl;
-
     }
 
-    size_t NumTables() const { return priority_tuples_vector.size(); }
-    size_t RulesInTable(size_t index) const { return priority_tuples_vector[index]->CountNumRules(); }
+    size_t NumTables() const {
+        return priority_tuples_vector.size();
+    }
+    size_t RulesInTable(size_t index) const {
+        return priority_tuples_vector[index]->CountNumRules();
+    }
 
-    void prints(){
+    void prints() {
         double memSize = double(MemSizeBytes());
         int numRules = rules.size();
-        printf("\trules: %d \n",numRules);
-        printf("\ttuples: %ld \n",NumTables());
-        printf("\tSize(KB): %f \n", memSize/1024);
-        printf("\tByte/rule: %f \n", memSize/numRules);
+        printf("\trules: %d \n", numRules);
+        printf("\ttuples: %ld \n", NumTables());
+        printf("\tSize(KB): %f \n", memSize / 1024);
+        printf("\tByte/rule: %f \n", memSize / numRules);
     }
 
     std::string funName() override {
         return "class: PSTSS";
     }
 
-
-private:
+  private:
     void RetainInvaraintOfPriorityVector() {
-        std::sort(begin(priority_tuples_vector), end(priority_tuples_vector), []( PriorityTuple * lhs,  PriorityTuple * rhs) { return lhs->maxPriority > rhs->maxPriority; });
+        std::sort(begin(priority_tuples_vector), end(priority_tuples_vector), [](PriorityTuple* lhs, PriorityTuple* rhs) { return lhs->maxPriority > rhs->maxPriority; });
     }
-    std::unordered_map<uint64_t, PriorityTuple *> all_priority_tuples;
-    std::vector<PriorityTuple *> priority_tuples_vector;
+    std::unordered_map<uint64_t, PriorityTuple*> all_priority_tuples;
+    std::vector<PriorityTuple*> priority_tuples_vector;
 };
-
 
 #endif

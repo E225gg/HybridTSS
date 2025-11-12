@@ -154,7 +154,7 @@ vector<SubHybridTSS *> SubHybridTSS::ConstructClassifier(const vector<int> &op, 
 // func name: ClassifyAPacket
 // description: 根据packet内容进行查找，对于hash节点，先根据bit为进行哈希，
 //              再查找bigClassifier
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 int SubHybridTSS::ClassifyAPacket(const Packet &packet) {
     int matchPri = -1;
@@ -197,7 +197,7 @@ int SubHybridTSS::ClassifyAPacket(const Packet &packet) {
 // -----------------------------------------------------------------------------
 // func name: DeleteRule
 // description: 找到rule所在的节点并删除，对于线性节点使用二分查找
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 void SubHybridTSS::DeleteRule(const Rule &rule) {
     switch (fun) {
@@ -236,7 +236,7 @@ void SubHybridTSS::DeleteRule(const Rule &rule) {
 // -----------------------------------------------------------------------------
 // func name: InsertRule
 // description: 根据rule找到相应的节点并插入，对于线性节点使用二分查找插入
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 void SubHybridTSS::InsertRule(const Rule &rule) {
     switch (fun) {
@@ -274,7 +274,7 @@ void SubHybridTSS::InsertRule(const Rule &rule) {
 // -----------------------------------------------------------------------------
 // func name: MemSizeBytes
 // description: 根据节点类型计算Memory
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 Memory SubHybridTSS::MemSizeBytes() const {
     Memory totMemory = 0;
@@ -309,7 +309,7 @@ Memory SubHybridTSS::MemSizeBytes() const {
 // -----------------------------------------------------------------------------
 // func name: MemoryAccess
 // description: 因父类设计不合理，待重新实现
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 int SubHybridTSS::MemoryAccess() const {
     return 0;
@@ -318,7 +318,7 @@ int SubHybridTSS::MemoryAccess() const {
 // -----------------------------------------------------------------------------
 // func name: getKey
 // description: 根据rule与当前节点的状态获得哈希key
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 uint32_t SubHybridTSS::getKey(const Rule &r) const {
     uint32_t Key = 0;
@@ -333,7 +333,7 @@ uint32_t SubHybridTSS::getKey(const Rule &r) const {
 // -----------------------------------------------------------------------------
 // func name: getKey
 // description: 根据Packet与当前节点的状态获得哈希key
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 uint32_t SubHybridTSS::getKey(const Packet &p) const {
     uint32_t Key = 0;
@@ -350,7 +350,7 @@ uint32_t SubHybridTSS::getKey(const Packet &p) const {
 // description: 计算当前节点即所有子节点的reward，先依次递归所有孩子节点计算reward，
 //              再根据所有孩子节点reward值总和计算当前节点的reward，保存当前节点的
 //              state, action, reward返回，供QTable更新使用
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 vector<vector<int> > SubHybridTSS::getReward() {
     vector<vector<int> > res;
@@ -372,7 +372,7 @@ vector<vector<int> > SubHybridTSS::getReward() {
 // -----------------------------------------------------------------------------
 // func name: getRuleSize
 // description: 计算当前节点含有的规则数量
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 uint32_t SubHybridTSS::getRuleSize() {
     return rules.size();
@@ -381,7 +381,7 @@ uint32_t SubHybridTSS::getRuleSize() {
 // -----------------------------------------------------------------------------
 // func name: getRulePrefixKey
 // description: 已废弃不再使用
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 uint32_t SubHybridTSS::getRulePrefixKey(const Rule &r) {
     return (r.prefix_length[0] << 6) + r.prefix_length[1];
@@ -390,7 +390,7 @@ uint32_t SubHybridTSS::getRulePrefixKey(const Rule &r) {
 // -----------------------------------------------------------------------------
 // func name: getRules
 // description: 返回当前节点所有规则，后门接口，不使用
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 vector<Rule> SubHybridTSS::getRules() {
     return rules;
@@ -399,7 +399,7 @@ vector<Rule> SubHybridTSS::getRules() {
 // -----------------------------------------------------------------------------
 // func name: FindRule
 // description: 查询rule是否在当前节点及子节点中，DEBUG代码，不使用
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 void SubHybridTSS::FindRule(const Rule &rule) {
     if (fun == linear || fun == TM || fun == PSTSS) {
@@ -427,7 +427,7 @@ void SubHybridTSS::FindRule(const Rule &rule) {
 // -----------------------------------------------------------------------------
 // func name: recurDelete
 // description: 递归删除，C++ RAII
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 #define DEBUGREDELETE
 #ifdef DEBUGREDELETE
@@ -436,21 +436,55 @@ void SubHybridTSS::recurDelete() {
         if (iter) {
             iter->recurDelete();
             delete iter;
+            iter = nullptr; // 好習慣：刪除後設為 nullptr
         }
     }
     if(bigClassifier) {
         bigClassifier->recurDelete();
+        delete bigClassifier;
+        bigClassifier = nullptr; // 好習慣
     }
     children.clear();
-    delete bigClassifier;
 }
 #endif
 //#undef DEBUGREDELETE
 
 // -----------------------------------------------------------------------------
+// func name: reset
+// description: 重置節點狀態以便在訓練中重用，避免重複 new/delete
+// -----------------------------------------------------------------------------
+void SubHybridTSS::reset() {
+    // 步驟 1: 清理所有動態配置的子節點
+    recurDelete();
+
+    // 步驟 2: 重置成員變數到初始狀態 (參考建構函式)
+    // 注意：rules, par, bigOffset 等在重用時不需要改變，所以不重置
+    state = 0;
+    reward = 0;
+    maxBigPriority = -1;
+    fun = -1; // 或其他代表未設定的初始值
+    action = 0;
+
+    // 清理分類器指標
+    TMO = nullptr;
+    pstss = nullptr;
+    bigClassifier = nullptr; // recurDelete 已經處理，這裡確保為空
+
+    // 清理與 Hash 相關的狀態
+    nHashTable = 0;
+    nHashBit = 0;
+    dim = 0;
+    bit = 0;
+    offset = 0;
+
+    // 確保 children vector 是空的
+    children.clear();
+}
+
+// -----------------------------------------------------------------------------
 // func name: getState
 // description: 获取当前节点state
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 int SubHybridTSS::getState() const {
     return state;
@@ -459,7 +493,7 @@ int SubHybridTSS::getState() const {
 // -----------------------------------------------------------------------------
 // func name: getAction
 // description: 获取当前节点action
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 int SubHybridTSS::getAction() const {
     return action;
@@ -468,7 +502,7 @@ int SubHybridTSS::getAction() const {
 // -----------------------------------------------------------------------------
 // func name: addReward
 // description: 在构造时对当前节点的reward值进行更新，当节点类型为TM或PSTSS时被调用
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 void SubHybridTSS::addReward(int r) {
     this->reward += r;
@@ -477,7 +511,7 @@ void SubHybridTSS::addReward(int r) {
 // -----------------------------------------------------------------------------
 // func name: FindPacket
 // description: DEBUG代码，不使用
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 void SubHybridTSS::FindPacket(const Packet &packet) {
     int matchPri = -1;
@@ -522,7 +556,7 @@ void SubHybridTSS::FindPacket(const Packet &packet) {
 // -----------------------------------------------------------------------------
 // func name: state2str
 // description: state转string
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 string state2str(int state) {
     string res;
@@ -544,22 +578,44 @@ string state2str(int state) {
 // -----------------------------------------------------------------------------
 // func name: printInfo
 // description: 打印当前节点信息
-// To-do: 
+// To-do:
 // -----------------------------------------------------------------------------
 void SubHybridTSS::printInfo() {
-    if (fun == TM || fun == PSTSS) {
-        if (rules.size() > 20) {
-            cout << "nodeID:# " << nodeId << endl;
-            cout << "rule size: " << rules.size() << endl;
-            cout << "Tuple size: " << TMO->NumTables() << endl;
-            cout << "state:   " << state2str(state) << endl;
-            cout << "bigOffset:   " << bigOffset[0] << "  " << bigOffset[1] << "  " << bigOffset[2] << "  " << bigOffset[3] << endl;
-            for (const auto& r : rules) {
-                r.Print();
-            }
-            cout << endl;
-        }
+    size_t tuple_size = 0;
+    switch(fun) {
+        case TM: if(TMO) tuple_size = TMO->NumTables(); break;
+        case PSTSS: if(pstss) tuple_size = pstss->NumTables(); break;
+        case Hash: tuple_size = children.size(); break;
+        case linear: tuple_size = children.size(); break;
+        default: tuple_size = 0; break;
     }
+
+    std::string fun_str;
+    switch(fun) {
+        case TM: fun_str = "TM"; break;
+        case PSTSS: fun_str = "PSTSS"; break;
+        case Hash: fun_str = "Hash"; break;
+        case linear: fun_str = "Linear"; break;
+        default: fun_str = "Unknown"; break;
+    }
+
+    if ((fun == TM || fun == PSTSS || fun == Hash || fun == linear) && (tuple_size > 0)) {
+        cout << "nodeID:# " << nodeId  << endl;
+        cout << "fun: " << fun_str << endl;
+        cout << "rule size: " << rules.size() << endl;
+        cout << "tuple size: " << tuple_size << endl;
+        cout << "state: " << state2str(state) << endl;
+        cout << "bigOffset: " << bigOffset[0] << "  "
+                  << bigOffset[1] << "  "
+                  << bigOffset[2] << "  "
+                  << bigOffset[3] << endl;
+
+        for (const auto& r : rules) {
+            r.Print();
+        }
+        cout << endl;
+    }
+
     for (auto iter : children) {
         if (iter) {
             iter->printInfo();
@@ -568,6 +624,4 @@ void SubHybridTSS::printInfo() {
     if (bigClassifier) {
         bigClassifier->printInfo();
     }
-
 }
-

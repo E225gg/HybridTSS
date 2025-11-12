@@ -8,7 +8,7 @@
 
 void Tuple::Insertion(const Rule& r) {
 
-    cmap_node * new_node = new cmap_node(r); /*key & rule*/
+    cmap_node* new_node = new cmap_node(r); /*key & rule*/
     cmap_insert(&map_in_tuple, new_node, HashRule(r));
 
     /*uint32_t key = HashRule(r);
@@ -18,9 +18,9 @@ void Tuple::Insertion(const Rule& r) {
 }
 
 void Tuple::Deletion(const Rule& r) {
-    //find node containing the rule
+    // find node containing the rule
     unsigned int hash_r = HashRule(r);
-    cmap_node * found_node = cmap_find(&map_in_tuple, hash_r);
+    cmap_node* found_node = cmap_find(&map_in_tuple, hash_r);
     while (found_node != nullptr) {
         if (found_node->priority == r.priority) {
             cmap_remove(&map_in_tuple, found_node, hash_r);
@@ -36,12 +36,12 @@ void Tuple::Deletion(const Rule& r) {
 
 int Tuple::WorstAccesses() const {
     // TODO
-    return 1;//cmap_largest_chain(&map_in_tuple);
+    return 1; // cmap_largest_chain(&map_in_tuple);
 }
 
-int Tuple::FindMatchPacket(const Packet& p)  {
+int Tuple::FindMatchPacket(const Packet& p) {
 
-    cmap_node * found_node = cmap_find(&map_in_tuple, HashPacket(p));
+    cmap_node* found_node = cmap_find(&map_in_tuple, HashPacket(p));
     int priority = -1;
     while (found_node != nullptr) {
         if (found_node->rule_ptr->MatchesPacket(p)) {
@@ -51,21 +51,23 @@ int Tuple::FindMatchPacket(const Packet& p)  {
     }
     return priority;
 
-/*	auto ptr = table.find(HashPacket(p));
-	if (ptr != table.end()) {
-		for (const Rule& r : ptr->second) {
-			if (r.MatchesPacket(p)) {
-				return r.priority;
-			}
-		}
-	}
-	return -1;*/
+    /*	auto ptr = table.find(HashPacket(p));
+            if (ptr != table.end()) {
+                    for (const Rule& r : ptr->second) {
+                            if (r.MatchesPacket(p)) {
+                                    return r.priority;
+                            }
+                    }
+            }
+            return -1;*/
 }
 
 bool inline Tuple::IsPacketMatchToRule(const Packet& p, const Rule& r) {
     for (int i = 0; i < r.dim; i++) {
-        if (p[i] < r.range[i][LowDim]) return false;
-        if (p[i] > r.range[i][HighDim]) return false;
+        if (p[i] < r.range[i][LowDim])
+            return false;
+        if (p[i] > r.range[i][HighDim])
+            return false;
     }
     return true;
 }
@@ -77,13 +79,12 @@ uint32_t inline Tuple::HashRule(const Rule& r) const {
     }
     return hash_finish(hash, 16);
 
-/*	uint32_t hash = HashBasis;
-	for (size_t d = 0; d < tuple.size(); d++) {
-		hash *= HashMult;
-		hash += r.range[d][LowDim] & ForgeUtils::Mask(tuple[d]);
-	}
-	return hash;*/
-
+    /*	uint32_t hash = HashBasis;
+            for (size_t d = 0; d < tuple.size(); d++) {
+                    hash *= HashMult;
+                    hash += r.range[d][LowDim] & ForgeUtils::Mask(tuple[d]);
+            }
+            return hash;*/
 }
 
 uint32_t inline Tuple::HashPacket(const Packet& p) const {
@@ -104,7 +105,7 @@ uint32_t inline Tuple::HashPacket(const Packet& p) const {
     return hash;*/
 }
 
-void TupleSpaceSearch::ConstructClassifier(const std::vector<Rule>& r){
+void TupleSpaceSearch::ConstructClassifier(const std::vector<Rule>& r) {
     /*int multiples = 5;
     for (int i = 0; i < r[0].dim / multiples; i++) {
         dims.push_back(i * multiples);
@@ -141,15 +142,15 @@ void TupleSpaceSearch::DeleteRule(const Rule& rule) {
 
     auto hit = all_tuples.find(KeyRulePrefix(rule));
     if (hit != end(all_tuples)) {
-        //there is a tuple
+        // there is a tuple
         hit->second.Deletion(rule);
         if (hit->second.IsEmpty()) {
-            //destroy tuple and erase from the map
+            // destroy tuple and erase from the map
             hit->second.Destroy();
             all_tuples.erase(hit);
         }
     } else {
-        //nothing to do?
+        // nothing to do?
         printf("Warning DeleteRule: no matching tuple in the rule; it should be here when inserted\n");
         exit(0);
     }
@@ -163,10 +164,10 @@ void TupleSpaceSearch::DeleteRule(const Rule& rule) {
 void TupleSpaceSearch::InsertRule(const Rule& rule) {
     auto hit = all_tuples.find(KeyRulePrefix(rule));
     if (hit != end(all_tuples)) {
-        //there is a tuple
+        // there is a tuple
         hit->second.Insertion(rule);
     } else {
-        //create_tuple
+        // create_tuple
         std::vector<unsigned int> lengths;
         for (int d : dims) {
             lengths.push_back(rule.prefix_length[d]);
@@ -193,27 +194,28 @@ void PriorityTuple::Insertion(const Rule& r, bool& priority_change) {
     priority_container.insert(r.priority);
     Tuple::Insertion(r);
 }
-void  PriorityTuple::Deletion(const Rule& r, bool& priority_change) {
+void PriorityTuple::Deletion(const Rule& r, bool& priority_change) {
 
     auto pit = priority_container.equal_range(r.priority);
     priority_container.erase(pit.first);
-    if (priority_container.size() == 0)  {
+    if (priority_container.size() == 0) {
         maxPriority = -1;
         priority_change = true;
     } else if (r.priority == maxPriority) {
         maxPriority = *priority_container.rbegin();
         priority_change = true;
-    } else priority_change = false;
+    } else
+        priority_change = false;
     Tuple::Deletion(r);
 }
-
 
 int PriorityTupleSpaceSearch::ClassifyAPacket(const Packet& packet) {
     int priority = -1;
     int q = 0;
     for (auto& tuple : priority_tuples_vector) {
-        //if (tuple->maxPriority < 0) printf("priority %d\n", tuple->maxPriority);
-        if (priority > tuple->maxPriority) break;
+        // if (tuple->maxPriority < 0) printf("priority %d\n", tuple->maxPriority);
+        if (priority > tuple->maxPriority)
+            break;
         auto result = tuple->FindMatchPacket(packet);
         q++;
         priority = priority > result ? priority : result;
@@ -232,10 +234,10 @@ void PriorityTupleSpaceSearch::DeleteRule(const Rule& rule) {
     auto hit = all_priority_tuples.find(KeyRulePrefix(rule));
 
     if (hit != end(all_priority_tuples)) {
-        //there is a tuple
+        // there is a tuple
         hit->second->Deletion(rule, priority_change);
         if (hit->second->IsEmpty()) {
-            //destroy tuple and erase from the map
+            // destroy tuple and erase from the map
 
             all_priority_tuples.erase(hit);
             hit->second->Destroy();
@@ -243,12 +245,12 @@ void PriorityTupleSpaceSearch::DeleteRule(const Rule& rule) {
             priority_tuples_vector.pop_back();
 
         } else if (priority_change) {
-            //sort tuple again
+            // sort tuple again
             RetainInvaraintOfPriorityVector();
         }
 
     } else {
-        //nothing to do?
+        // nothing to do?
         printf("Warning DeleteRule: no matching tuple in the rule; it should be here when inserted\n");
         exit(0);
     }
@@ -259,19 +261,18 @@ void PriorityTupleSpaceSearch::DeleteRule(const Rule& rule) {
     /*if (i != rules.size() - 1)
         rules[i] = std::move(rules[rules.size() - 1]);
     rules.pop_back();*/
-
 }
 void PriorityTupleSpaceSearch::InsertRule(const Rule& rule) {
     bool priority_change = false;
     auto hit = all_priority_tuples.find(KeyRulePrefix(rule));
     if (hit != end(all_priority_tuples)) {
-        //there is a tuple
+        // there is a tuple
         hit->second->Insertion(rule, priority_change);
         if (priority_change) {
             RetainInvaraintOfPriorityVector();
         }
     } else {
-        //create_tuple
+        // create_tuple
         std::vector<unsigned int> lengths;
         for (int d : dims) {
             lengths.push_back(rule.prefix_length[d]);
@@ -285,7 +286,6 @@ void PriorityTupleSpaceSearch::InsertRule(const Rule& rule) {
     rules.push_back(rule);
 }
 
-
 int PriorityTupleSpaceSearch::WorstAccesses() const {
     int cost = 0;
     for (const PriorityTuple* t : priority_tuples_vector) {
@@ -293,4 +293,3 @@ int PriorityTupleSpaceSearch::WorstAccesses() const {
     }
     return cost;
 }
-
