@@ -12,6 +12,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Generate 1k test data (rules=1000, packets=10000)
+        run: uv run gen_testdata.py --rules 1000 --packets 10000 --seed 42 --out-dir Data
+
       - name: Build
         run: make
 
@@ -19,7 +27,7 @@ jobs:
         run: make test
 
       - name: Run main and generate results
-        run: ./main -r Data/test_100 -p Data/test_100_trace
+        run: ./main -r Data/test_1000 -p Data/test_1000_trace
 
       - name: Upload results.csv
         if: success()
