@@ -10,3 +10,7 @@ ErrorLog.csv
 1
 improve.md
 .cpp-linter_cache
+build/
+main
+build-*
+cmake-build-*

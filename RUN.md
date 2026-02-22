@@ -5,6 +5,11 @@ make            # standard optimized build
 make DEBUG=1    # debug build (unoptimized, -DDEBUG)
 make ASAN=1     # AddressSanitizer build (memory error detection)
 make clean      # remove build artifacts
+
+# Tests (GoogleTest via CMake)
+make test          # configure + build (Release) + run ctest
+make test-verbose  # verbose ctest output
+make clean-test    # remove CMake build directory
 ```
 
 ## Run

@@ -69,6 +69,24 @@ make DEBUG=1
 make ASAN=1
 ```
 
+### Tests (GoogleTest)
+
+GoogleTest is fetched automatically via CMake FetchContent. From the repo root:
+
+```bash
+make test          # configure + build (Release) + run ctest
+make test-verbose  # same, verbose ctest output
+make clean-test    # remove CMake build directory
+```
+
+Direct CMake usage:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+cd build && ctest --output-on-failure
+```
+
 ### Clean
 
 ```bash
