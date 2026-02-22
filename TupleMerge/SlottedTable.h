@@ -84,6 +84,13 @@ struct SlottedTable {
     }
     SlottedTable(const TupleMergeUtils::TupleTable& tuple);
     ~SlottedTable() {
+        // Walk and delete all dynamically-allocated cmap_node objects
+        cmap_cursor cursor = cmap_cursor_start(&map_in_tuple);
+        while (cursor.node != nullptr) {
+            cmap_node* node = cursor.node;
+            cmap_cursor_advance(&cursor);
+            delete node;
+        }
         cmap_destroy(&map_in_tuple);
     }
 

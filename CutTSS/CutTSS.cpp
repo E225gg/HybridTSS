@@ -62,7 +62,12 @@ void CutTSS::ConstructClassifier(const vector<Rule>& rules) {
 }
 
 CutTSS::~CutTSS() {
+    for (auto* node : nodeSet) {
+        delete node;
+    }
     nodeSet.clear();
+    delete PSbig;
+    PSbig = nullptr;
 }
 
 int CutTSS::ClassifyAPacket(const Packet& packet) {

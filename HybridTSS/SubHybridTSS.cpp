@@ -1,5 +1,7 @@
 #include "SubHybridTSS.h"
 
+using namespace std;
+
 // -----------------------------------------------------------------------------
 // func name: SubHybridTSS
 // description: 构造函数
@@ -8,9 +10,16 @@
 SubHybridTSS::SubHybridTSS() {
     reward = -1;
     bigClassifier = nullptr;
+    par = nullptr;
+    TMO = nullptr;
+    pstss = nullptr;
     state = 0;
     maxBigPriority = -1;
 
+}
+
+SubHybridTSS::~SubHybridTSS() {
+    recurDelete();
 }
 
 SubHybridTSS::SubHybridTSS(const vector<Rule> &r) {
@@ -18,8 +27,10 @@ SubHybridTSS::SubHybridTSS(const vector<Rule> &r) {
     state = 0;
     reward = 0;
     bigClassifier = nullptr;
-    maxBigPriority = -1;
     par = nullptr;
+    TMO = nullptr;
+    pstss = nullptr;
+    maxBigPriority = -1;
     bigOffset.resize(4, 0);
 
 }
@@ -29,15 +40,20 @@ SubHybridTSS::SubHybridTSS(const vector<Rule> &r, vector<int> offsetBit) {
     reward = -1;
     this->offsetBit = std::move(offsetBit);
     bigClassifier = nullptr;
+    par = nullptr;
+    TMO = nullptr;
+    pstss = nullptr;
     maxBigPriority = -1;
 }
 SubHybridTSS::SubHybridTSS(const vector<Rule> &r, int s, SubHybridTSS* p) {
     this->rules = r;
     this->state = s;
     bigClassifier = nullptr;
+    par = p;
+    TMO = nullptr;
+    pstss = nullptr;
     maxBigPriority = -1;
     reward = 0;
-    par = p;
 }
 
 
@@ -188,7 +204,7 @@ int SubHybridTSS::ClassifyAPacket(const Packet &packet) {
 
     }
 
-    if (matchPri < maxBigPriority) {
+    if (bigClassifier && matchPri < maxBigPriority) {
         matchPri = max(matchPri, bigClassifier->ClassifyAPacket(packet));
     }
     return matchPri;
@@ -221,7 +237,9 @@ void SubHybridTSS::DeleteRule(const Rule &rule) {
         case Hash: {
             // To-do: record dim and offset in construct
             if (rule.prefix_length[dim] < bit) {
-                bigClassifier->DeleteRule(rule);
+                if (bigClassifier) {
+                    bigClassifier->DeleteRule(rule);
+                }
             } else {
                 uint32_t Key = getKey(rule);
                 if (children[Key]) {
@@ -256,7 +274,9 @@ void SubHybridTSS::InsertRule(const Rule &rule) {
         case Hash: {
             // To-do: record dim and offset in construct
             if (rule.prefix_length[dim] < bit) {
-                bigClassifier->InsertRule(rule);
+                if (bigClassifier) {
+                    bigClassifier->InsertRule(rule);
+                }
             } else {
                 uint32_t Key = getKey(rule);
                 if (children[Key]) {
@@ -392,7 +412,7 @@ uint32_t SubHybridTSS::getRulePrefixKey(const Rule &r) {
 // description: 返回当前节点所有规则，后门接口，不使用
 // To-do:
 // -----------------------------------------------------------------------------
-vector<Rule> SubHybridTSS::getRules() {
+const vector<Rule>& SubHybridTSS::getRules() const {
     return rules;
 }
 
@@ -417,8 +437,11 @@ void SubHybridTSS::FindRule(const Rule &rule) {
             }
         } else {
             cout << "big" << endl;
-            bigClassifier->FindRule(rule);
-
+            if (bigClassifier) {
+                bigClassifier->FindRule(rule);
+            } else {
+                cout << "bigClassifier is null" << endl;
+            }
         }
 
     }
@@ -436,13 +459,22 @@ void SubHybridTSS::recurDelete() {
         if (iter) {
             iter->recurDelete();
             delete iter;
-            iter = nullptr; // 好習慣：刪除後設為 nullptr
+            iter = nullptr;
         }
     }
     if(bigClassifier) {
         bigClassifier->recurDelete();
         delete bigClassifier;
-        bigClassifier = nullptr; // 好習慣
+        bigClassifier = nullptr;
+    }
+    // Free leaf-node classifiers owned by this node
+    if (TMO) {
+        delete TMO;
+        TMO = nullptr;
+    }
+    if (pstss) {
+        delete pstss;
+        pstss = nullptr;
     }
     children.clear();
 }
@@ -548,7 +580,7 @@ void SubHybridTSS::FindPacket(const Packet &packet) {
 
     }
 
-    if (matchPri < maxBigPriority) {
+    if (bigClassifier && matchPri < maxBigPriority) {
         matchPri = max(matchPri, bigClassifier->ClassifyAPacket(packet));
     }
 }

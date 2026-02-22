@@ -69,7 +69,9 @@ size_t cache_line_size() {
     p = fopen("/sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size", "r");
     unsigned int i = 0;
     if (p) {
-        fscanf(p, "%u", &i);
+        if (fscanf(p, "%u", &i) != 1) {
+            i = 0;  // [HybridTSS] Fixed -Wunused-result warning
+        }
         fclose(p);
     }
     return i;
@@ -974,6 +976,7 @@ cmap_replace(struct cmap* cmap, struct cmap_node* old_node,
     bool ok;
 
     ok = cmap_replace__(impl, old_node, new_node, hash, h1) || cmap_replace__(impl, old_node, new_node, hash, h2);
+    (void)ok;  // [HybridTSS] Fixed -Wunused-but-set-variable warning (assert commented out)
     // printf("ok? %d\n", ok);
     // ovs_assert(ok);
 
@@ -1122,7 +1125,6 @@ int cmap_largest_chain(const struct cmap* cmap) {
         for (int j = 0; j < CMAP_K; j++) {
             int chain = 0;
             cmap_node* n = &impl->buckets[i].nodes[j];
-            unsigned int key = 0;
             while (n) {
                 chain++;
                 // if (key != 0 && key != n->key) {

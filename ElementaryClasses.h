@@ -22,24 +22,24 @@
 #include <climits>
 
 // base
-#define RULE_SIZE 16
-#define NODE_SIZE 32
-#define LEAF_NODE_SIZE 4
-#define TREE_NODE_SIZE 8
-#define Null -1
-#define PTR_SIZE 4
-#define HEADER_SIZE 4
-#define RULESIZE 4.5
+constexpr int RULE_SIZE      = 16;
+constexpr int NODE_SIZE      = 32;
+constexpr int LEAF_NODE_SIZE = 4;
+constexpr int TREE_NODE_SIZE = 8;
+constexpr int Null           = -1;
+constexpr int PTR_SIZE       = 4;
+constexpr int HEADER_SIZE    = 4;
+constexpr double RULESIZE    = 4.5;
 
-#define MAXDIMENSIONS 5
-#define FieldSA 0
-#define FieldDA 1
-#define FieldSP 2
-#define FieldDP 3
-#define FieldProto 4
+constexpr int MAXDIMENSIONS = 5;
+constexpr int FieldSA       = 0;
+constexpr int FieldDA       = 1;
+constexpr int FieldSP       = 2;
+constexpr int FieldDP       = 3;
+constexpr int FieldProto    = 4;
 
-#define LowDim 0
-#define HighDim 1
+constexpr int LowDim  = 0;
+constexpr int HighDim = 1;
 
 typedef uint32_t Point;
 typedef std::vector<Point> Packet;
@@ -47,7 +47,7 @@ typedef uint32_t Memory;
 
 struct Rule {
     // Rule(){};
-    explicit Rule(int dim = 5) : dim(dim), range(dim, {{0, 0}}), prefix_length(dim, 0) {
+    explicit Rule(int dim = 5) : dim(dim), prefix_length(dim, 0), range(dim, {{0, 0}}) {
         markedDelete = 0;
     }
 
@@ -93,7 +93,12 @@ struct Rule {
  *  Description:  load rules from rule file
  * =====================================================================================
  */
-static std::vector<Rule> loadrule(FILE* fp) {
+inline std::vector<Rule> loadrule(FILE* fp) {
+    if (!fp) {
+        fprintf(stderr, "Error: null FILE pointer passed to loadrule\n");
+        return {};
+    }
+
     unsigned int tmp;
     unsigned sip1, sip2, sip3, sip4, smask;
     unsigned dip1, dip2, dip3, dip4, dmask;
@@ -238,7 +243,12 @@ static std::vector<Rule> loadrule(FILE* fp) {
     }
     return rule;
 }
-static std::vector<Packet> loadpacket(FILE* fp) {
+inline std::vector<Packet> loadpacket(FILE* fp) {
+    if (!fp) {
+        fprintf(stderr, "Error: null FILE pointer passed to loadpacket\n");
+        return {};
+    }
+
     unsigned int header[MAXDIMENSIONS];
     unsigned int proto_mask, fid;
     int number_pkt = 0; // number of packets
@@ -274,6 +284,7 @@ static std::vector<Packet> loadpacket(FILE* fp) {
 
 class PacketClassifier {
   public:
+    virtual ~PacketClassifier() = default;
     virtual void ConstructClassifier(const std::vector<Rule>& rules) = 0;
     virtual int ClassifyAPacket(const Packet& packet) = 0;
     virtual void DeleteRule(const Rule& rule) = 0;

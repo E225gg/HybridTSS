@@ -18,35 +18,33 @@
 #include "../ElementaryClasses.h"
 #include "../OVS/TupleSpaceSearch.h"
 
-using namespace std;
-
 #define MAXCUTS1 64 // keys for memory consumption
 #define MAXCUTS2 8  // keys for memory consumption
 #define MAXCUTBITS1 int(log(MAXCUTS1) / log(2))
-#define ANDBITS1 (1 << MAXCUTBITS1) - 1
+#define ANDBITS1 ((1 << MAXCUTBITS1) - 1)
 #define MAXCUTBITS2 int(log(MAXCUTS2) / log(2))
-#define ANDBITS2 (1 << MAXCUTBITS2) - 1
+#define ANDBITS2 ((1 << MAXCUTBITS2) - 1)
 
 enum NodeType { Cuts,
                 Linear,
                 TSS };
 
 struct CutTSSNode {
-    vector<Rule> classifier;
+    std::vector<Rule> classifier;
     int nrules;
     int depth;
     bool isLeaf;
 
     NodeType nodeType;
-    vector<int> ncuts;
-    vector<int> numbit, andbit;
+    std::vector<int> ncuts;
+    std::vector<int> numbit, andbit;
 
-    vector<vector<unsigned int>> field;
+    std::vector<std::vector<unsigned int>> field;
 
     PriorityTupleSpaceSearch* PSTSS;
-    vector<CutTSSNode*> children;
+    std::vector<CutTSSNode*> children;
 
-    CutTSSNode(const vector<Rule>& rules, vector<vector<unsigned int>> f, int level = 0,
+    CutTSSNode(const std::vector<Rule>& rules, std::vector<std::vector<unsigned int>> f, int level = 0,
                bool isleaf = false, NodeType flag = Cuts) {
         classifier = rules;
         nrules = int(rules.size());
@@ -59,6 +57,13 @@ struct CutTSSNode {
         andbit.resize(MAXDIMENSIONS);
         field = std::move(f);
         PSTSS = nullptr;
+    }
+
+    ~CutTSSNode() {
+        for (auto* child : children) {
+            delete child;
+        }
+        delete PSTSS;
     }
 };
 
@@ -78,13 +83,13 @@ class CutTSS : public PacketClassifier {
         return rules.size();
     }
 
-    static void CalcCutsn(CutTSSNode* node, const vector<int>& dims);
-    CutTSSNode* ConstructCutTSSTrie(const vector<Rule>& rules, const vector<int>& dims, int k);
-    static vector<vector<Rule>> partition(vector<vector<int>> threshold, const vector<Rule>& rules);
+    static void CalcCutsn(CutTSSNode* node, const std::vector<int>& dims);
+    CutTSSNode* ConstructCutTSSTrie(const std::vector<Rule>& rules, const std::vector<int>& dims, int k);
+    static std::vector<std::vector<Rule>> partition(std::vector<std::vector<int>> threshold, const std::vector<Rule>& rules);
     static int trieLookup(const Packet& packet, CutTSSNode* root, int speedUpFlag, uint64_t& Query);
     static void trieDelete(const Rule& delete_rule, CutTSSNode* root, int speedUpFlag);
     static void trieInsert(const Rule& insert_rule, CutTSSNode* root, int speedUpFlag);
-    string funName() {
+    std::string funName() {
         return "class: CutTSS";
     }
 
@@ -141,9 +146,9 @@ class CutTSS : public PacketClassifier {
     int threshold;
     int rtssleaf;
 
-    vector<int> maxMask = {32, 32, 16, 16, 8};
-    vector<int> maxPri;
-    vector<CutTSSNode*> nodeSet;
+    std::vector<int> maxMask = {32, 32, 16, 16, 8};
+    std::vector<int> maxPri;
+    std::vector<CutTSSNode*> nodeSet;
     PriorityTupleSpaceSearch* PSbig;
 
     enum statisticalType { numRules,
@@ -156,7 +161,7 @@ class CutTSS : public PacketClassifier {
     enum memType { totFiCutsMem,
                    totTSSMem,
                    totMem };
-    vector<vector<Rule>> subset;
-    vector<vector<int>> statistics;
-    vector<vector<double>> memory;
+    std::vector<std::vector<Rule>> subset;
+    std::vector<std::vector<int>> statistics;
+    std::vector<std::vector<double>> memory;
 };
