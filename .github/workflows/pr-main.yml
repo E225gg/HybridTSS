@@ -1,7 +1,6 @@
 name: Build, Test, and Run Main
 
 on:
-  push:
   pull_request:
 
 jobs:
