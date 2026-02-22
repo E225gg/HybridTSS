@@ -1,0 +1,29 @@
+name: Build, Test, and Run Main
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: make
+
+      - name: Run tests
+        run: make test
+
+      - name: Run main and generate results
+        run: ./main -r Data/test_100 -p Data/test_100_trace
+
+      - name: Upload results.csv
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-results
+          path: results.csv

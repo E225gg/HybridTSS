@@ -6,6 +6,8 @@ result*
 run.py
 fw*
 .*
+!.github
+!.github/workflows
 ErrorLog.csv
 1
 improve.md
