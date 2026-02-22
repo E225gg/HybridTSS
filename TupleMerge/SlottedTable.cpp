@@ -128,7 +128,6 @@ inline uint32_t Shift(uint32_t word, int t) {
 inline vector<uint32_t> RuleToBytes(const Rule& r, const TupleTable& tuple) {
     vector<uint32_t> result;
     for (size_t index = 0; index < tuple.size(); index++) {
-        int t = tuple[index];
         int p = r.range[index][LowDim] & Mask(tuple[index]);
         result.push_back(p >> 24);
         result.push_back((p >> 16) & 0xFF);
@@ -141,7 +140,6 @@ inline vector<uint32_t> RuleToBytes(const Rule& r, const TupleTable& tuple) {
 inline vector<uint32_t> PacketToBytes(const Packet& packet, const TupleTable& tuple) {
     vector<uint32_t> result;
     for (size_t index = 0; index < tuple.size(); index++) {
-        int t = tuple[index];
         int p = packet[index] & Mask(tuple[index]);
         result.push_back(p >> 24);
         result.push_back((p >> 16) & 0xFF);
@@ -434,6 +432,7 @@ bool SlottedTable::Deletion(const Rule& r, bool& priority_change) {
         while (found_node != nullptr) {
             if (found_node->priority == r.priority) {
                 cmap_remove(&map_in_tuple, found_node, hash_r);
+                delete found_node;
                 break;
             }
             found_node = found_node->next;

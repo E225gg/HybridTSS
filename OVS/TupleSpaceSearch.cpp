@@ -24,6 +24,7 @@ void Tuple::Deletion(const Rule& r) {
     while (found_node != nullptr) {
         if (found_node->priority == r.priority) {
             cmap_remove(&map_in_tuple, found_node, hash_r);
+            delete found_node;
             break;
         }
         found_node = found_node->next;
@@ -238,11 +239,16 @@ void PriorityTupleSpaceSearch::DeleteRule(const Rule& rule) {
         hit->second->Deletion(rule, priority_change);
         if (hit->second->IsEmpty()) {
             // destroy tuple and erase from the map
-
+            PriorityTuple* empty_tuple = hit->second;
             all_priority_tuples.erase(hit);
-            hit->second->Destroy();
+            empty_tuple->Destroy();
+            // Remove from priority vector before deleting
+            auto vec_it = std::find(priority_tuples_vector.begin(), priority_tuples_vector.end(), empty_tuple);
+            if (vec_it != priority_tuples_vector.end()) {
+                priority_tuples_vector.erase(vec_it);
+            }
+            delete empty_tuple;
             RetainInvaraintOfPriorityVector();
-            priority_tuples_vector.pop_back();
 
         } else if (priority_change) {
             // sort tuple again

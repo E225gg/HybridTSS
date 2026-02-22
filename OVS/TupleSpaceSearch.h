@@ -21,6 +21,13 @@ struct Tuple {
     }
     //~Tuple() { Destroy(); }
     void Destroy() {
+        // Walk and delete all dynamically-allocated cmap_node objects
+        cmap_cursor cursor = cmap_cursor_start(&map_in_tuple);
+        while (cursor.node != nullptr) {
+            cmap_node* node = cursor.node;
+            cmap_cursor_advance(&cursor);
+            delete node;
+        }
         cmap_destroy(&map_in_tuple);
     }
 
@@ -148,6 +155,17 @@ class TupleSpaceSearch : public PacketClassifier {
 class PriorityTupleSpaceSearch : public TupleSpaceSearch {
 
   public:
+    ~PriorityTupleSpaceSearch() override {
+        for (auto& pair : all_priority_tuples) {
+            if (pair.second) {
+                pair.second->Destroy();
+                delete pair.second;
+            }
+        }
+        all_priority_tuples.clear();
+        priority_tuples_vector.clear();
+    }
+
     int ClassifyAPacket(const Packet& one_packet);
     void DeleteRule(const Rule& rule);
     void InsertRule(const Rule& one_rule);

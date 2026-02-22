@@ -1,22 +1,25 @@
-## compile
-for x86
+## Compile
+
 ```bash
-make -f x86/makefile
-make clean -f x86/makefile
+make            # standard optimized build
+make DEBUG=1    # debug build (unoptimized, -DDEBUG)
+make ASAN=1     # AddressSanitizer build (memory error detection)
+make clean      # remove build artifacts
 ```
 
-for arm
+## Run
+
 ```bash
-make -f arm/makefile
-make clean -f arm/makefile
+./main -r <rule_file> -p <packet_file>
 ```
 
-## run
+Example:
+
 ```bash
 ./main -r ./Data/acl1_1k -p ./Data/acl1_1k_trace
 ```
 
-## lint
+## Lint
 
 ```bash
 uvx cpp-linter --style file --lines-changed-only true --file-annotations false --tidy-checks="*"

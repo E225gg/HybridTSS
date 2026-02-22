@@ -1,7 +1,9 @@
 #include "HybridTSS.h"
-#include <omp.h>  // 使用 OpenMP 多線程
+#include <omp.h>
 #include <atomic>
 #include <algorithm>
+
+using namespace std;
 
 
 // #define DEBUG
@@ -10,8 +12,12 @@
 #include <iomanip>
 
 
-HybridTSS::HybridTSS() {
-    binth = 8;
+HybridTSS::HybridTSS() : binth(8), root(nullptr) {
+}
+
+HybridTSS::~HybridTSS() {
+    delete root;   // ~SubHybridTSS() calls recurDelete() automatically
+    root = nullptr;
 }
 
 // -----------------------------------------------------------------------------
@@ -174,7 +180,7 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
 
     // Greedy for linear, TM,
     int s = state->getState();
-    vector<Rule> nodeRules = state->getRules();
+    const vector<Rule>& nodeRules = state->getRules();
     if (nodeRules.size() < binth) {
         return {linear, -1, -1};
     }
@@ -450,10 +456,10 @@ void HybridTSS::train(const vector<Rule> &rules) {
 
     #pragma omp parallel for schedule(static)
     for (int t = 0; t < numThreads; ++t) {
-        for (const auto& [key, value] : localQ[t]) {
-            int s = key_state(key);
-            int a = key_action(key);
-            int c = localCount[t][key];
+        for (const auto& kv : localQ[t]) {
+            int s = key_state(kv.first);
+            int a = key_action(kv.first);
+            int c = localCount[t][kv.first];
 
 #ifdef DEBUG
             lockAttempts++;
@@ -464,7 +470,7 @@ void HybridTSS::train(const vector<Rule> &rules) {
 #endif
             #pragma omp critical
             {
-                QTable[s][a] = (QTable[s][a] * QCount[s][a] + value * c) / (QCount[s][a] + c);
+                QTable[s][a] = (QTable[s][a] * QCount[s][a] + kv.second * c) / (QCount[s][a] + c);
                 QCount[s][a] += c;
             }
 #ifdef DEBUG

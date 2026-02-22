@@ -40,7 +40,7 @@ int Delta(TupleTable t1, TupleTable t2) {
 }
 
 void ForgeUtils::Crazify(TupleTable& tuple) {
-    int delta = abs(tuple[FieldSA] - tuple[FieldDA]);
+    // [HybridTSS] Removed unused variable 'delta'
 
     if (tuple[FieldSA] > tuple[FieldDA] + 4) {
         tuple[FieldDA] = 0;
@@ -248,6 +248,7 @@ void TupleMergeOnline::InsertRule(const Rule& rule) {
         Relax(tuple);
         SlottedTable* table = new SlottedTable(tuple);
         table->Insertion(rule, ignore);
+        (void)ignore;  // [HybridTSS] Intentionally unused
         tables.push_back(table);
         assignments[rule.priority] = table;
         Resort();

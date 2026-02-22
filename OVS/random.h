@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <random>
 #include "../ElementaryClasses.h"
-using namespace std;
 
 std::mt19937 generator;
 
