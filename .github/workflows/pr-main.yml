@@ -28,6 +28,9 @@ jobs:
       - name: Run tests
         run: make test
 
+      - name: Smoke check CLI
+        run: ./main --help || true
+
       - name: Run main and generate results
         run: ./main -r Data/test_1000 -p Data/test_1000_trace
 

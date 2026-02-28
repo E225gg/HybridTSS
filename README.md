@@ -105,6 +105,12 @@ make clean
 |---|---|
 | `-r <path>` | Path to rule file (ClassBench format) |
 | `-p <path>` | Path to packet trace file |
+| `--classifier <names>` | Comma-separated classifiers to run (`pstss,cuttss,hybrid`; default all) |
+| `--trials <N>` | Classification trials per classifier (default 10) |
+| `--skip-updates` / `--run-updates` | Disable/enable update benchmark (default on) |
+| `--seed <u64>` | RNG seed for deterministic update sequence (default 1) |
+| `--metrics <path>` | CSV output path (default `results.csv`) |
+| `--append-metrics` | Append to metrics file instead of overwriting |
 
 ### Example
 
