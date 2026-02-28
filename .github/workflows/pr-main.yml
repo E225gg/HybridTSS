@@ -5,7 +5,10 @@ on:
 
 jobs:
   build-test-run:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-22.04-arm' || 'ubuntu-latest' }}
 
     steps:
       - name: Checkout
@@ -32,5 +35,5 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: main-results
+          name: main-results-${{ matrix.arch }}
           path: results.csv
