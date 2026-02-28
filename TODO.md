@@ -21,6 +21,9 @@
 - [x] Fix `SlottedTable::Deletion` — `delete found_node` after `cmap_remove` (same pattern)
 - [x] Fix `Tuple::Destroy()` — walk all `cmap_node` objects with `cmap_cursor` and delete before `cmap_destroy`
 - [x] Fix `SlottedTable::~SlottedTable()` — walk all `cmap_node` objects with `cmap_cursor` and delete before `cmap_destroy`
+- [x] Fix `Tuple` copy semantics / double-free — enabled `~Tuple()` destructor, deleted copy ctor/assignment, implemented move ctor/assignment (transfers `cmap_impl*` ownership), made `Destroy()` idempotent, added null guard to `cmap_destroy`, removed all by-value `Tuple` copies in `TupleSpaceSearch`
+- [x] Delete copy/move on `SubHybridTSS`, `HybridTSS`, `SlottedTable` — prevents accidental shallow-copy double-free
+- [x] Simplify `SubHybridTSS::recurDelete()` — removed redundant manual recursion before `delete` (destructor handles it)
 
 ### API & Code Quality
 - [x] Remove `using namespace std` from 4 headers (`SubHybridTSS.h`, `HybridTSS.h`, `CutTSS.h`, `random.h`) — fully qualified `std::` types in headers
@@ -35,6 +38,7 @@
 
 ### Observability
 - [x] Add structured metrics output — `testPerformance()` writes CSV rows to `results.csv` (classifier, ruleset, num_rules, num_packets, construction_time_ms, avg_classify_us, classify_mpps, misclassified, avg_update_us, update_mpps)
+  - [x] Extend metrics with HybridTSS configuration values for reproducibility
 
 ### Testing
 - [x] Create `gen_testdata.py` — generates ClassBench-format rules + matching packet traces
@@ -55,14 +59,14 @@
 - [ ] Scope support matrix: IPv4 5-tuple + proto mask 0/0xFF only; unknown fields fall back to native dpcls
 
 ### HybridTSS Configurability
-- [ ] Introduce `HybridOptions` to hold tunables (binth, rtssleaf, loop_num, lr, decay, epsilons, state/action bits, seed, inflation)
-- [ ] Plumb options from CLI/config into HybridTSS; keep current hardcoded defaults when unspecified
-- [ ] Record options into metrics (config id + JSON dump) for reproducibility; plan for optional pre-trained QTable load
+- [x] Introduce `HybridOptions` to hold tunables (binth, rtssleaf, loop_num, lr, decay, epsilons, state/action bits, seed, inflation)
+- [x] Plumb options from CLI/config into HybridTSS; keep current hardcoded defaults when unspecified
+- [x] Record options into metrics (config id + JSON dump) for reproducibility; plan for optional pre-trained QTable load
 
 ### Benchmark Driver (main.cpp)
-- [ ] Add CLI flags: classifiers selection, trials, run/skip updates, seed, metrics path (append/overwrite)
+- [x] Add CLI flags: classifiers selection, trials, run/skip updates, seed, metrics path (append/overwrite)
 - [ ] Isolate state: rebuild or copy before updates so runs don’t contaminate each other
-- [ ] Replace global randomness with mt19937_64 seeded from CLI; generate update sequence once per run
+- [x] Replace global randomness with mt19937_64 seeded from CLI; generate update sequence once per run
 
 ### Observability
 - [ ] Define stats to expose (hit/miss, tuple/table counts, rules, build/training time, memory footprint, update latency)
@@ -72,9 +76,6 @@
 
 ### UB in cmap_rehash (risk: too high to fix)
 The OVS `cmap` code uses C-style `malloc`/`free`/`memset` to manage memory containing embedded `cmap_node` objects that hold `shared_ptr<Rule>`. This skips constructors/destructors, which is technically undefined behavior. Currently "accidentally correct" because the embedded nodes' `shared_ptr`s happen to be null when they're freed. Fixing this requires a deep structural rewrite of third-party OVS code.
-
-### Tuple copy semantics (risk: too high to fix)
-`Tuple` is stored in `std::unordered_map` but has no proper copy/move semantics for its `cmap` member (a C struct with internal pointers). The commented-out destructor `//~Tuple() { Destroy(); }` exists because enabling it causes double-free. Fixing this requires refactoring to pointer storage or making `Tuple` non-copyable.
 
 ### QCount memory usage in train() (optimization)
 `QCount` in `HybridTSS::train()` allocates a 256MB dense array. Could use a sparse `unordered_map` instead. Not a correctness issue.

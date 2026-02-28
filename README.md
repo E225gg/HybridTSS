@@ -87,12 +87,6 @@ cmake --build build -j$(nproc)
 cd build && ctest --output-on-failure
 ```
 
-### Clean
-
-```bash
-make clean
-```
-
 ## Usage
 
 ```bash
@@ -111,11 +105,23 @@ make clean
 | `--seed <u64>` | RNG seed for deterministic update sequence (default 1) |
 | `--metrics <path>` | CSV output path (default `results.csv`) |
 | `--append-metrics` | Append to metrics file instead of overwriting |
+| `--ht-binth <int>` | HybridTSS linear search threshold |
+| `--ht-rtssleaf <float>` | HybridTSS tuple-merge vs hash threshold |
+| `--ht-loop <int>` | HybridTSS training episodes |
+| `--ht-lr <float>` | HybridTSS learning rate |
+| `--ht-decay <float>` | HybridTSS learning rate decay |
+| `--ht-epsilon0 <float>` | HybridTSS initial epsilon |
+| `--ht-epsilon-min <float>` | HybridTSS minimum epsilon |
+| `--ht-epsilon-decay <float>` | HybridTSS epsilon decay factor |
+| `--ht-state-bits <int>` | HybridTSS state bits (Q-table size) |
+| `--ht-action-bits <int>` | HybridTSS action bits |
+| `--ht-hash-inflation <int>` | HybridTSS hash inflation factor |
+| `--ht-seed <u64>` | HybridTSS training seed (0 = time-based) |
 
 ### Example
 
 ```bash
-./main -r ./Data/acl1_1k -p ./Data/acl1_1k_trace
+./main -r ./Data/acl1_1k -p ./Data/acl1_1k_trace --classifier hybrid --ht-loop 40 --ht-hash-inflation 8 --ht-seed 123
 ```
 
 ## Input Formats
@@ -161,7 +167,7 @@ For each classifier, the program prints:
 Auto-generated with columns:
 
 ```
-classifier,ruleset,num_rules,num_packets,construction_time_ms,avg_classify_us,classify_mpps,misclassified,avg_update_us,update_mpps
+classifier,ruleset,num_rules,num_packets,construction_time_ms,avg_classify_us,classify_mpps,misclassified,avg_update_us,update_mpps,ht_binth,ht_rtssleaf,ht_loop,ht_lr,ht_decay,ht_epsilon0,ht_epsilon_min,ht_epsilon_decay,ht_state_bits,ht_action_bits,ht_hash_inflation,ht_seed
 ```
 
 ## Architecture Notes

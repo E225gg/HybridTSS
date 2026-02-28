@@ -317,8 +317,7 @@ SlottedTable::SlottedTable(const TupleTable& tuple)
 }
 
 int SlottedTable::WorstAccesses() const {
-    // TODO
-    return 1; // cmap_largest_chain(&map_in_tuple);
+    return cmap_largest_chain(&map_in_tuple);
 }
 
 int SlottedTable::ClassifyAPacket(const Packet& p) const {

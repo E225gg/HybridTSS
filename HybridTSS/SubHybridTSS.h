@@ -6,19 +6,24 @@
 
 #include "./../TupleMerge/TupleMergeOnline.h"
 
-#define inflation 10
-
 // action Type
 enum Fun{linear, PSTSS, TM, Hash};
 
 class SubHybridTSS {
 public:
     // base function
-    SubHybridTSS();
+    SubHybridTSS(int inflation_param = 10);
     ~SubHybridTSS();
-    explicit SubHybridTSS(const std::vector<Rule> &r);
-    SubHybridTSS(const std::vector<Rule> &r, int s, SubHybridTSS* p);
-    SubHybridTSS(const std::vector<Rule> &r, std::vector<int> offsetBit);
+
+    // Non-copyable and non-movable (owns raw pointer tree)
+    SubHybridTSS(const SubHybridTSS&) = delete;
+    SubHybridTSS& operator=(const SubHybridTSS&) = delete;
+    SubHybridTSS(SubHybridTSS&&) = delete;
+    SubHybridTSS& operator=(SubHybridTSS&&) = delete;
+
+    explicit SubHybridTSS(const std::vector<Rule> &r, int inflation_param = 10);
+    SubHybridTSS(const std::vector<Rule> &r, int s, SubHybridTSS* p, int inflation_param = 10);
+    SubHybridTSS(const std::vector<Rule> &r, std::vector<int> offsetBit, int inflation_param = 10);
     std::vector<SubHybridTSS*> ConstructClassifier(const std::vector<int> &op, const std::string& mode);
     int ClassifyAPacket(const Packet& packet);
     void DeleteRule(const Rule& rule);
@@ -64,6 +69,7 @@ private:
     int nHashTable, nHashBit;
     int dim, bit, offset; // bit: use high bits, offset use for get hashKey
     std::vector<int> offsetBit; // [0, 32]
+    int inflation_param;
 
     // Hash fun
     uint32_t getRulePrefixKey(const Rule &r);

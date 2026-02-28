@@ -410,8 +410,9 @@ void cmap_init(struct cmap* cmap) {
  * The client is responsible for destroying any data previously held in
  * 'cmap'. */
 void cmap_destroy(struct cmap* cmap) {
-    if (cmap) {
+    if (cmap && cmap->impl) {
         free_cacheline(cmap_get_impl(cmap));
+        cmap->impl = nullptr;
     }
 }
 

@@ -36,8 +36,7 @@ void Tuple::Deletion(const Rule& r) {
 }
 
 int Tuple::WorstAccesses() const {
-    // TODO
-    return 1; // cmap_largest_chain(&map_in_tuple);
+    return cmap_largest_chain(&map_in_tuple);
 }
 
 int Tuple::FindMatchPacket(const Packet& p) {
@@ -146,8 +145,7 @@ void TupleSpaceSearch::DeleteRule(const Rule& rule) {
         // there is a tuple
         hit->second.Deletion(rule);
         if (hit->second.IsEmpty()) {
-            // destroy tuple and erase from the map
-            hit->second.Destroy();
+            // erase from map; ~Tuple() handles cmap cleanup
             all_tuples.erase(hit);
         }
     } else {
@@ -180,7 +178,7 @@ void TupleSpaceSearch::InsertRule(const Rule& rule) {
 
 int TupleSpaceSearch::WorstAccesses() const {
     int cost = 0;
-    for (auto pair : all_tuples) {
+    for (const auto& pair : all_tuples) {
         cost += pair.second.WorstAccesses() + 1;
     }
     return cost;
@@ -241,13 +239,12 @@ void PriorityTupleSpaceSearch::DeleteRule(const Rule& rule) {
             // destroy tuple and erase from the map
             PriorityTuple* empty_tuple = hit->second;
             all_priority_tuples.erase(hit);
-            empty_tuple->Destroy();
             // Remove from priority vector before deleting
             auto vec_it = std::find(priority_tuples_vector.begin(), priority_tuples_vector.end(), empty_tuple);
             if (vec_it != priority_tuples_vector.end()) {
                 priority_tuples_vector.erase(vec_it);
             }
-            delete empty_tuple;
+            delete empty_tuple; // ~PriorityTuple() -> ~Tuple() handles cmap cleanup
             RetainInvaraintOfPriorityVector();
 
         } else if (priority_change) {

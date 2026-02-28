@@ -12,7 +12,7 @@ using namespace std;
 #include <iomanip>
 
 
-HybridTSS::HybridTSS() : binth(8), root(nullptr) {
+HybridTSS::HybridTSS(const HybridOptions& opts) : options(opts), binth(opts.binth), root(nullptr), rtssleaf(opts.rtssleaf) {
 }
 
 HybridTSS::~HybridTSS() {
@@ -28,7 +28,7 @@ HybridTSS::~HybridTSS() {
 void HybridTSS::ConstructClassifier(const vector<Rule> &rules) {
     train(rules);
 
-    root = new SubHybridTSS(rules);
+    root = new SubHybridTSS(rules, options.hash_inflation);
     queue<SubHybridTSS*> que;
     que.push(root);
     bool flag = true;
@@ -172,7 +172,7 @@ size_t HybridTSS::RulesInTable(size_t tableIndex) const {
 // return: {action类型，维度，所选bit(不计算偏移)}
 // To-do: 方法冗余待优化，编码方式待修改，目的支持单个维度多次选取
 // -----------------------------------------------------------------------------
-vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion = 100) {
+vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion) {
     if (!state) {
         cout << "state node exist" << endl;
         exit(-1);
@@ -339,16 +339,16 @@ void HybridTSS::train(const vector<Rule> &rules) {
 
     cout << "Starting parallel training with " << omp_get_max_threads() << " threads..." << endl;
 
-    const int stateSize = 1 << 20;
-    const int actionSize = 1 << 6;
-    const int loopNum = 50;      // 減少以便測試
-    const int progressStep = 10;
-    const double lr = 0.05;         // 初始 learning rate
-    const double decay = 0.001;    // learning rate 衰減係數
+    const int stateSize = 1 << options.state_bits;
+    const int actionSize = 1 << options.action_bits;
+    const int loopNum = options.loop_num;      // 減少以便測試
+    const int progressStep = options.progress_step;
+    const double lr = options.lr;         // 初始 learning rate
+    const double decay = options.decay;    // learning rate 衰減係數
 
-    const double epsilon0 = 0.5;
-    const double epsilonMin = 0.01;
-    const double epsilonDecay = 0.003;
+    const double epsilon0 = options.epsilon0;
+    const double epsilonMin = options.epsilon_min;
+    const double epsilonDecay = options.epsilon_decay;
 
 #ifdef DEBUG
     vector<double> rewardCurve(loopNum, 0.0);
@@ -378,10 +378,16 @@ void HybridTSS::train(const vector<Rule> &rules) {
         auto &Qlocal = localQ[tid];
         auto &countLocal = localCount[tid];
 
-        std::mt19937 gen(static_cast<unsigned>(
-            std::chrono::high_resolution_clock::now().time_since_epoch().count()) ^ (tid * 131071u));
+        uint64_t seed_base;
+        if (options.seed != 0) {
+            seed_base = options.seed;
+        } else {
+            seed_base = static_cast<uint64_t>(
+                std::chrono::high_resolution_clock::now().time_since_epoch().count());
+        }
+        std::mt19937 gen(static_cast<unsigned>(seed_base ^ (tid * 131071u)));
 
-        SubHybridTSS root(rules);
+        SubHybridTSS root(rules, options.hash_inflation);
 
         for (int i = tid; i < loopNum; i += numThreads) {
 

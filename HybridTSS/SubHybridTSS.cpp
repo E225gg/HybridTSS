@@ -7,53 +7,22 @@ using namespace std;
 // description: 构造函数
 // To-do: 部分构造方式不再使用，冗余待删除
 // -----------------------------------------------------------------------------
-SubHybridTSS::SubHybridTSS() {
-    reward = -1;
-    bigClassifier = nullptr;
-    par = nullptr;
-    TMO = nullptr;
-    pstss = nullptr;
-    state = 0;
-    maxBigPriority = -1;
-
-}
+SubHybridTSS::SubHybridTSS(int inflation_param) : TMO(nullptr), pstss(nullptr), bigClassifier(nullptr), par(nullptr), maxBigPriority(-1), state(0), action(0), reward(-1), fun(0), rules(), nHashTable(0), nHashBit(0), dim(0), bit(0), offset(0), offsetBit(), inflation_param(inflation_param) {}
 
 SubHybridTSS::~SubHybridTSS() {
     recurDelete();
 }
 
-SubHybridTSS::SubHybridTSS(const vector<Rule> &r) {
+SubHybridTSS::SubHybridTSS(const vector<Rule> &r, int inflation_param) : TMO(nullptr), pstss(nullptr), bigClassifier(nullptr), par(nullptr), maxBigPriority(-1), state(0), action(0), reward(0), fun(0), rules(), nHashTable(0), nHashBit(0), dim(0), bit(0), offset(0), offsetBit(), inflation_param(inflation_param) {
     this->rules = r;
-    state = 0;
-    reward = 0;
-    bigClassifier = nullptr;
-    par = nullptr;
-    TMO = nullptr;
-    pstss = nullptr;
-    maxBigPriority = -1;
     bigOffset.resize(4, 0);
-
 }
 
-SubHybridTSS::SubHybridTSS(const vector<Rule> &r, vector<int> offsetBit) {
+SubHybridTSS::SubHybridTSS(const vector<Rule> &r, vector<int> offsetBit, int inflation_param) : TMO(nullptr), pstss(nullptr), bigClassifier(nullptr), par(nullptr), maxBigPriority(-1), state(0), action(0), reward(-1), fun(0), rules(), nHashTable(0), nHashBit(0), dim(0), bit(0), offset(0), offsetBit(std::move(offsetBit)), inflation_param(inflation_param) {
     this->rules = r;
-    reward = -1;
-    this->offsetBit = std::move(offsetBit);
-    bigClassifier = nullptr;
-    par = nullptr;
-    TMO = nullptr;
-    pstss = nullptr;
-    maxBigPriority = -1;
 }
-SubHybridTSS::SubHybridTSS(const vector<Rule> &r, int s, SubHybridTSS* p) {
+SubHybridTSS::SubHybridTSS(const vector<Rule> &r, int s, SubHybridTSS* p, int inflation_param) : TMO(nullptr), pstss(nullptr), bigClassifier(nullptr), par(p), maxBigPriority(-1), state(s), action(0), reward(0), fun(0), rules(), nHashTable(0), nHashBit(0), dim(0), bit(0), offset(0), offsetBit(), inflation_param(inflation_param) {
     this->rules = r;
-    this->state = s;
-    bigClassifier = nullptr;
-    par = p;
-    TMO = nullptr;
-    pstss = nullptr;
-    maxBigPriority = -1;
-    reward = 0;
 }
 
 
@@ -124,10 +93,11 @@ vector<SubHybridTSS *> SubHybridTSS::ConstructClassifier(const vector<int> &op, 
 
             uint32_t nrules = rules.size();
             nHashBit = 0;
-            while (nHashBit <= bit && (1 << nHashBit) - 1 < nrules * inflation) {
+            const int maxHashBits = 30; // guard against overflow of 1u << nHashBit on 32-bit int
+            while (nHashBit <= bit && nHashBit < maxHashBits && ((1u << nHashBit) - 1u) < nrules * static_cast<uint32_t>(inflation_param)) {
                 nHashBit ++;
             }
-            this->nHashTable = (1 << nHashBit) - 1;
+            this->nHashTable = (1u << nHashBit) - 1u;
             this->children.resize(nHashTable + 1, nullptr);
             vector<vector<Rule> > subRules(nHashTable + 1);
 
@@ -457,13 +427,11 @@ void SubHybridTSS::FindRule(const Rule &rule) {
 void SubHybridTSS::recurDelete() {
     for (auto &iter : children) {
         if (iter) {
-            iter->recurDelete();
-            delete iter;
+            delete iter;    // ~SubHybridTSS() handles recursive cleanup
             iter = nullptr;
         }
     }
     if(bigClassifier) {
-        bigClassifier->recurDelete();
         delete bigClassifier;
         bigClassifier = nullptr;
     }
