@@ -1,11 +1,25 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <random>
+#include <sstream>
+#include <unordered_set>
 //#include "./OVS/TupleSpaceSearch.h"
 #include "ElementaryClasses.h"
 #include "./HybridTSS/HybridTSS.h"
 #include "./CutTSS/CutTSS.h"
 using namespace std;
+
+struct Options {
+    string rule_file;
+    string packet_file;
+    vector<string> classifiers; // names: pstss, cuttss, hybrid
+    int trials = 10;
+    bool run_updates = true;
+    uint64_t seed = 1;
+    string metrics_path = "results.csv";
+    bool append_metrics = false;
+};
 
 string ruleFile, packetFile;
 FILE *fpr = nullptr, *fpt = nullptr;
@@ -20,7 +34,85 @@ int nInsert, nDelete;
 ofstream fError("ErrorLog.csv", ios::app);
 ofstream fMetrics;  // CSV metrics output
 
-void testPerformance(PacketClassifier *p) {
+static vector<string> split(const string& s, char delim) {
+    vector<string> out;
+    string item;
+    std::istringstream ss(s);
+    while (std::getline(ss, item, delim)) {
+        if (!item.empty()) {
+            out.push_back(item);
+        }
+    }
+    return out;
+}
+
+static void usage(const char* prog) {
+    cerr << "Usage: " << prog << " -r <rule_file> -p <packet_file> [options]\n"
+         << "  --classifier <name[,name]>   Select classifiers (pstss,cuttss,hybrid), default: all\n"
+         << "  --trials <N>                Classification trials per classifier (default 10)\n"
+         << "  --skip-updates              Skip update benchmark (default: run)\n"
+         << "  --run-updates               Force running update benchmark\n"
+         << "  --seed <u64>                RNG seed for updates (default 1)\n"
+         << "  --metrics <path>            Metrics CSV path (default results.csv)\n"
+         << "  --append-metrics            Append to metrics file instead of overwrite\n";
+}
+
+static bool parse_args(int argc, char* argv[], Options& opts) {
+    for (int i = 1; i < argc; i++) {
+        string arg = argv[i];
+        if (arg == "-r") {
+            if (i + 1 >= argc) { cerr << "-r requires a file path" << endl; return false; }
+            opts.rule_file = argv[++i];
+        } else if (arg == "-p") {
+            if (i + 1 >= argc) { cerr << "-p requires a file path" << endl; return false; }
+            opts.packet_file = argv[++i];
+        } else if (arg == "--classifier" || arg == "--classifiers") {
+            if (i + 1 >= argc) { cerr << "--classifier requires a value" << endl; return false; }
+            auto parts = split(argv[++i], ',');
+            opts.classifiers.insert(opts.classifiers.end(), parts.begin(), parts.end());
+        } else if (arg == "--trials") {
+            if (i + 1 >= argc) { cerr << "--trials requires a value" << endl; return false; }
+            opts.trials = stoi(argv[++i]);
+            if (opts.trials <= 0) { cerr << "--trials must be > 0" << endl; return false; }
+        } else if (arg == "--skip-updates") {
+            opts.run_updates = false;
+        } else if (arg == "--run-updates") {
+            opts.run_updates = true;
+        } else if (arg == "--seed") {
+            if (i + 1 >= argc) { cerr << "--seed requires a value" << endl; return false; }
+            opts.seed = strtoull(argv[++i], nullptr, 10);
+        } else if (arg == "--metrics") {
+            if (i + 1 >= argc) { cerr << "--metrics requires a value" << endl; return false; }
+            opts.metrics_path = argv[++i];
+        } else if (arg == "--append-metrics") {
+            opts.append_metrics = true;
+        } else {
+            cerr << "Unknown argument: " << arg << endl;
+            return false;
+        }
+    }
+
+    if (opts.rule_file.empty() || opts.packet_file.empty()) {
+        return false;
+    }
+
+    if (opts.classifiers.empty()) {
+        opts.classifiers = {"pstss", "cuttss", "hybrid"};
+    }
+
+    // de-duplicate
+    unordered_set<string> seen;
+    vector<string> uniq;
+    for (const auto& c : opts.classifiers) {
+        if (seen.insert(c).second) {
+            uniq.push_back(c);
+        }
+    }
+    opts.classifiers.swap(uniq);
+    return true;
+}
+
+void testPerformance(PacketClassifier *p, const Options& opts, const vector<int>& updatePlan) {
     cout << p->funName() << ":" << endl;
     Start = std::chrono::steady_clock::now();
     p->ConstructClassifier(rules);
@@ -62,37 +154,37 @@ void testPerformance(PacketClassifier *p) {
     printf("\tThroughput: %f Mpps\n", classifyThroughput);
 
     // Update
-    printf("\nUpdate Performance:\n");
+    double avgUpdateTime = 0.0;
+    double updateThroughput = 0.0;
+    if (opts.run_updates) {
+        printf("\nUpdate Performance:\n");
 
-    if (randUpdate.empty()) {
-        nInsert = nDelete = 0;
-        for (int ra = 0; ra < rules.size(); ra ++) {
-            int t = rand() % 2;
-            randUpdate.push_back(t);
-            t ? nDelete ++ : nInsert++;
+        Start = std::chrono::steady_clock::now();
+        for (int ra = 0; ra < rules.size(); ra++) {
+            updatePlan[ra] ? p->DeleteRule(rules[ra]) : p->InsertRule(rules[ra]);
         }
-    }
-    Start = std::chrono::steady_clock::now();
-    for (int ra = 0; ra < rules.size(); ra++) {
-        randUpdate[ra] ? p->DeleteRule(rules[ra]) : p->InsertRule(rules[ra]);
-    }
-    End = std::chrono::steady_clock::now();
-    elapsed_seconds = End - Start;
-    int nrules = static_cast<int>(rules.size());
-    double updateThroughput = 1 / (elapsed_seconds.count() * 1e6 / nrules);
-    double avgUpdateTime = elapsed_seconds.count() * 1e6 / nrules;
+        End = std::chrono::steady_clock::now();
+        elapsed_seconds = End - Start;
+        int nrules = static_cast<int>(rules.size());
+        updateThroughput = 1 / (elapsed_seconds.count() * 1e6 / nrules);
+        avgUpdateTime = elapsed_seconds.count() * 1e6 / nrules;
 
-    printf("\t%d rules update: insert_num = %d delete_num = %d\n", nrules, nInsert, nDelete);
-    printf("\tTotal update time: %f s\n", elapsed_seconds.count());
-    printf("\tAverage update time: %f us\n", avgUpdateTime);
-    printf("\tThroughput: %f Mpps\n", updateThroughput);
-    printf("-------------------------------\n\n");
+        printf("\t%d rules update: insert_num = %d delete_num = %d\n", nrules, nInsert, nDelete);
+        printf("\tTotal update time: %f s\n", elapsed_seconds.count());
+        printf("\tAverage update time: %f us\n", avgUpdateTime);
+        printf("\tThroughput: %f Mpps\n", updateThroughput);
+        printf("-------------------------------\n\n");
+    } else {
+        printf("\nUpdate Performance: skipped (per --skip-updates)\n");
+        printf("-------------------------------\n\n");
+    }
 
     // Write CSV metrics row
     if (fMetrics.is_open()) {
+        int nrules_for_csv = static_cast<int>(rules.size());
         fMetrics << p->funName() << ","
                  << ruleFile << ","
-                 << nrules << ","
+                 << nrules_for_csv << ","
                  << nPacket << ","
                  << constructTime << ","
                  << avgClassifyTime << ","
@@ -104,38 +196,20 @@ void testPerformance(PacketClassifier *p) {
 }
 
 int main(int argc, char* argv[]) {
-    for (int i = 0; i < argc; i++) {
-        if (string(argv[i]) == "-r") {
-            if (i + 1 >= argc) {
-                cerr << "Error: -r requires a file path argument" << endl;
-                return 1;
-            }
-            ruleFile = string(argv[++ i]);
-            fpr = fopen(argv[i], "r");
-            if (!fpr) {
-                cerr << "Error: cannot open rule file: " << ruleFile << endl;
-                return 1;
-            }
-        }
-        else if (string(argv[i]) == "-p") {
-            if (i + 1 >= argc) {
-                cerr << "Error: -p requires a file path argument" << endl;
-                return 1;
-            }
-            packetFile = string(argv[++ i]);
-            fpt = fopen(argv[i], "r");
-            if (!fpt) {
-                cerr << "Error: cannot open packet file: " << packetFile << endl;
-                if (fpr) fclose(fpr);
-                return 1;
-            }
-        }
+    Options opts;
+    if (!parse_args(argc, argv, opts)) {
+        usage(argv[0]);
+        return 1;
     }
 
+    ruleFile = opts.rule_file;
+    packetFile = opts.packet_file;
+    fpr = fopen(opts.rule_file.c_str(), "r");
+    fpt = fopen(opts.packet_file.c_str(), "r");
     if (!fpr || !fpt) {
-        cerr << "Usage: " << argv[0] << " -r <rule_file> -p <packet_file>" << endl;
         if (fpr) fclose(fpr);
         if (fpt) fclose(fpt);
+        cerr << "Error: cannot open input files" << endl;
         return 1;
     }
 
@@ -152,31 +226,42 @@ int main(int argc, char* argv[]) {
     cout << packets.size() << endl;
 
     // Open CSV metrics file
-    fMetrics.open("results.csv", ios::out);
-    if (fMetrics.is_open()) {
+    auto metricsMode = opts.append_metrics ? ios::out | ios::app : ios::out;
+    fMetrics.open(opts.metrics_path, metricsMode);
+    if (fMetrics.is_open() && !opts.append_metrics) {
         fMetrics << "classifier,ruleset,num_rules,num_packets,"
                  << "construction_time_ms,avg_classify_us,classify_mpps,"
                  << "misclassified,avg_update_us,update_mpps\n";
     }
 
-    // ---HybridTSS---Construction---
-//    PacketClassifier *HT = new HybridTSS();
-    // PacketClassifier *TMO = new TupleMergeOnline();
-    // testPerformance(TMO);
-    PacketClassifier *PSTSS = new PriorityTupleSpaceSearch();
-    testPerformance(PSTSS);
-    PacketClassifier *CT = new CutTSS();
-    testPerformance(CT);
+    // Prepare deterministic update plan
+    randUpdate.clear();
+    nInsert = nDelete = 0;
+    std::mt19937_64 gen(opts.seed);
+    std::uniform_int_distribution<int> coin(0, 1);
+    for (size_t i = 0; i < rules.size(); i++) {
+        int t = coin(gen);
+        randUpdate.push_back(t);
+        t ? nDelete++ : nInsert++;
+    }
 
-    // ---test---
-//    cout <<"---------------------" << endl;
-    PacketClassifier *HT = new HybridTSS();
-    testPerformance(HT);
-//    fout << endl;
-
-    delete PSTSS;
-    delete CT;
-    delete HT;
+    for (const auto& clf : opts.classifiers) {
+        if (clf == "pstss") {
+            PacketClassifier *PSTSS = new PriorityTupleSpaceSearch();
+            testPerformance(PSTSS, opts, randUpdate);
+            delete PSTSS;
+        } else if (clf == "cuttss") {
+            PacketClassifier *CT = new CutTSS();
+            testPerformance(CT, opts, randUpdate);
+            delete CT;
+        } else if (clf == "hybrid") {
+            PacketClassifier *HT = new HybridTSS();
+            testPerformance(HT, opts, randUpdate);
+            delete HT;
+        } else {
+            cerr << "Unknown classifier name: " << clf << endl;
+        }
+    }
 
     if (fMetrics.is_open()) {
         fMetrics.close();
