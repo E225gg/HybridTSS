@@ -44,7 +44,7 @@ class TupleMergeOnline : public PacketClassifier {
     virtual void DeleteRule(const Rule& rule);
     virtual void InsertRule(const Rule& r);
     virtual Memory MemSizeBytes() const {
-        int ruleSizeBytes = 19; // TODO variables sizes
+        int ruleSizeBytes = sizeof(Rule);
         int sizeBytes = 0;
         for (const auto table : tables) {
             sizeBytes += table->MemSizeBytes(ruleSizeBytes);

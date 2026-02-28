@@ -96,7 +96,7 @@ class TupleSpaceSearch : public PacketClassifier {
     }
     virtual int WorstAccesses() const;
     Memory MemSizeBytes() const {
-        int ruleSizeBytes = 19; // TODO variables sizes
+        int ruleSizeBytes = sizeof(Rule);
         int sizeBytes = 0;
         for (auto& pair : all_tuples) {
             sizeBytes += pair.second.MemSizeBytes(ruleSizeBytes);
@@ -135,8 +135,18 @@ class TupleSpaceSearch : public PacketClassifier {
         return GetNumberOfTuples();
     }
     size_t RulesInTable(size_t index) const {
+        if (index >= all_tuples.size()) {
+            return 0;
+        }
+        size_t i = 0;
+        for (const auto& kv : all_tuples) {
+            if (i == index) {
+                return kv.second.CountNumRules();
+            }
+            ++i;
+        }
         return 0;
-    } // TODO : assign some order
+    }
   protected:
     uint64_t inline KeyRulePrefix(const Rule& r) {
         int key = 0;
@@ -171,7 +181,7 @@ class PriorityTupleSpaceSearch : public TupleSpaceSearch {
     void InsertRule(const Rule& one_rule);
     int WorstAccesses() const;
     Memory MemSizeBytes() const {
-        int ruleSizeBytes = 32; // TODO variables sizes
+        int ruleSizeBytes = sizeof(Rule);
         int sizeBytes = 0;
         for (auto& tuple : priority_tuples_vector) {
             sizeBytes += tuple->MemSizeBytes(ruleSizeBytes);

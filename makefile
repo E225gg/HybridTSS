@@ -17,7 +17,7 @@ CXXFLAGS += -g -O0 -fsanitize=address -fno-omit-frame-pointer
 LDFLAGS += -fsanitize=address
 endif
 
-OBJS = main.o HybridTSS.o SubHybridTSS.o TupleMergeOnline.o \
+OBJS = main.o cli.o HybridTSS.o SubHybridTSS.o TupleMergeOnline.o \
        TupleSpaceSearch.o cmap.o SlottedTable.o MapExtensions.o CutTSS.o
 
 # Targets needed to bring the executable up to date
@@ -27,6 +27,9 @@ main: $(OBJS)
 # -----------------------------------------------------
 main.o: main.cpp ElementaryClasses.h
 	$(CXX) $(CXXFLAGS) -c main.cpp
+
+cli.o: cli.cpp cli.h HybridTSS/HybridTSS.h ElementaryClasses.h
+	$(CXX) $(CXXFLAGS) -c cli.cpp
 
 # ** HybridTSS **
 HybridTSS.o: $(HTPATH)HybridTSS.h $(HTPATH)HybridTSS.cpp $(HTPATH)SubHybridTSS.h ElementaryClasses.h
@@ -59,6 +62,7 @@ CutTSS.o: $(CTPATH)CutTSS.h $(CTPATH)CutTSS.cpp ElementaryClasses.h
 clean:
 	rm -f *.o
 	rm -f main
+	rm -f results.csv
 
 # --- GoogleTest test suite (CMake-based) ---
 test:
@@ -74,4 +78,14 @@ test-verbose:
 clean-test:
 	rm -rf build
 
-.PHONY: clean test test-verbose clean-test
+.PHONY: clean test test-verbose clean-test smoketest run
+
+# Quick smoke test on generated small dataset (uses defaults)
+smoketest: main
+	uv run gen_testdata.py --rules 50 --packets 200 --seed 9 --out-dir Data
+	./main -r Data/test_50 -p Data/test_50_trace --classifier hybrid --ht-loop 5 --ht-hash-inflation 8 --ht-seed 9 --metrics results.csv
+	@grep -q "ht_binth" results.csv && echo "smoketest ok" || (echo "smoketest missing header" && false)
+
+# Convenience run target (pass ARGS="...")
+run: main
+	./main $(ARGS)

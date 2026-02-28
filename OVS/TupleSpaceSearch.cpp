@@ -36,8 +36,7 @@ void Tuple::Deletion(const Rule& r) {
 }
 
 int Tuple::WorstAccesses() const {
-    // TODO
-    return 1; // cmap_largest_chain(&map_in_tuple);
+    return cmap_largest_chain(&map_in_tuple);
 }
 
 int Tuple::FindMatchPacket(const Packet& p) {
