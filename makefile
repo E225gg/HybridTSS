@@ -25,7 +25,7 @@ main: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o main $(OBJS)
 
 # -----------------------------------------------------
-main.o: main.cpp ElementaryClasses.h
+main.o: main.cpp ElementaryClasses.h cli.h HybridTSS/HybridTSS.h CutTSS/CutTSS.h
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
 cli.o: cli.cpp cli.h HybridTSS/HybridTSS.h ElementaryClasses.h

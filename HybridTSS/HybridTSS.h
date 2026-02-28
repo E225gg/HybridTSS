@@ -1,6 +1,7 @@
 #ifndef HYBRIDTSSV1_2_HYBRIDTSS_H
 #define HYBRIDTSSV1_2_HYBRIDTSS_H
 #include "SubHybridTSS.h"
+#include <cstdint>
 
 struct HybridOptions {
     int binth = 8;              // linear search threshold

@@ -56,7 +56,11 @@ bool parse_args(int argc, char* argv[], Options& opts) {
             opts.classifiers.insert(opts.classifiers.end(), parts.begin(), parts.end());
         } else if (arg == "--trials") {
             if (i + 1 >= argc) { cerr << "--trials requires a value" << endl; return false; }
-            opts.trials = stoi(argv[++i]);
+            try {
+                opts.trials = stoi(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--trials requires an integer" << endl; return false;
+            }
             if (opts.trials <= 0) { cerr << "--trials must be > 0" << endl; return false; }
         } else if (arg == "--skip-updates") {
             opts.run_updates = false;
@@ -72,40 +76,88 @@ bool parse_args(int argc, char* argv[], Options& opts) {
             opts.append_metrics = true;
         } else if (arg == "--ht-binth") {
             if (i + 1 >= argc) { cerr << "--ht-binth requires a value" << endl; return false; }
-            opts.hybrid_opts.binth = stoi(argv[++i]);
+            try {
+                opts.hybrid_opts.binth = stoi(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-binth requires an integer" << endl; return false;
+            }
         } else if (arg == "--ht-rtssleaf") {
             if (i + 1 >= argc) { cerr << "--ht-rtssleaf requires a value" << endl; return false; }
-            opts.hybrid_opts.rtssleaf = stod(argv[++i]);
+            try {
+                opts.hybrid_opts.rtssleaf = stod(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-rtssleaf requires a number" << endl; return false;
+            }
         } else if (arg == "--ht-loop") {
             if (i + 1 >= argc) { cerr << "--ht-loop requires a value" << endl; return false; }
-            opts.hybrid_opts.loop_num = stoi(argv[++i]);
+            try {
+                opts.hybrid_opts.loop_num = stoi(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-loop requires an integer" << endl; return false;
+            }
         } else if (arg == "--ht-lr") {
             if (i + 1 >= argc) { cerr << "--ht-lr requires a value" << endl; return false; }
-            opts.hybrid_opts.lr = stod(argv[++i]);
+            try {
+                opts.hybrid_opts.lr = stod(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-lr requires a number" << endl; return false;
+            }
         } else if (arg == "--ht-decay") {
             if (i + 1 >= argc) { cerr << "--ht-decay requires a value" << endl; return false; }
-            opts.hybrid_opts.decay = stod(argv[++i]);
+            try {
+                opts.hybrid_opts.decay = stod(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-decay requires a number" << endl; return false;
+            }
         } else if (arg == "--ht-epsilon0") {
             if (i + 1 >= argc) { cerr << "--ht-epsilon0 requires a value" << endl; return false; }
-            opts.hybrid_opts.epsilon0 = stod(argv[++i]);
+            try {
+                opts.hybrid_opts.epsilon0 = stod(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-epsilon0 requires a number" << endl; return false;
+            }
         } else if (arg == "--ht-epsilon-min") {
             if (i + 1 >= argc) { cerr << "--ht-epsilon-min requires a value" << endl; return false; }
-            opts.hybrid_opts.epsilon_min = stod(argv[++i]);
+            try {
+                opts.hybrid_opts.epsilon_min = stod(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-epsilon-min requires a number" << endl; return false;
+            }
         } else if (arg == "--ht-epsilon-decay") {
             if (i + 1 >= argc) { cerr << "--ht-epsilon-decay requires a value" << endl; return false; }
-            opts.hybrid_opts.epsilon_decay = stod(argv[++i]);
+            try {
+                opts.hybrid_opts.epsilon_decay = stod(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-epsilon-decay requires a number" << endl; return false;
+            }
         } else if (arg == "--ht-state-bits") {
             if (i + 1 >= argc) { cerr << "--ht-state-bits requires a value" << endl; return false; }
-            opts.hybrid_opts.state_bits = stoi(argv[++i]);
+            try {
+                opts.hybrid_opts.state_bits = stoi(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-state-bits requires an integer" << endl; return false;
+            }
         } else if (arg == "--ht-action-bits") {
             if (i + 1 >= argc) { cerr << "--ht-action-bits requires a value" << endl; return false; }
-            opts.hybrid_opts.action_bits = stoi(argv[++i]);
+            try {
+                opts.hybrid_opts.action_bits = stoi(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-action-bits requires an integer" << endl; return false;
+            }
         } else if (arg == "--ht-hash-inflation") {
             if (i + 1 >= argc) { cerr << "--ht-hash-inflation requires a value" << endl; return false; }
-            opts.hybrid_opts.hash_inflation = stoi(argv[++i]);
+            try {
+                opts.hybrid_opts.hash_inflation = stoi(argv[++i]);
+            } catch (const std::exception&) {
+                cerr << "--ht-hash-inflation requires an integer" << endl; return false;
+            }
         } else if (arg == "--ht-seed") {
             if (i + 1 >= argc) { cerr << "--ht-seed requires a value" << endl; return false; }
-            opts.hybrid_opts.seed = strtoull(argv[++i], nullptr, 10);
+            try {
+                opts.hybrid_opts.seed = strtoull(argv[++i], nullptr, 10);
+            } catch (const std::exception&) {
+                cerr << "--ht-seed requires an integer" << endl; return false;
+            }
         } else {
             cerr << "Unknown argument: " << arg << endl;
             return false;

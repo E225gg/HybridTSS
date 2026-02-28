@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <fstream>
 #include <memory>
+#include <vector>
 #include "MapExtensions.h"
 
 struct Tuple {
@@ -138,14 +139,21 @@ class TupleSpaceSearch : public PacketClassifier {
         if (index >= all_tuples.size()) {
             return 0;
         }
-        size_t i = 0;
+        // Provide stable ordering by iterating sorted keys
+        std::vector<uint64_t> keys;
+        keys.reserve(all_tuples.size());
         for (const auto& kv : all_tuples) {
-            if (i == index) {
-                return kv.second.CountNumRules();
-            }
-            ++i;
+            keys.push_back(kv.first);
         }
-        return 0;
+        std::sort(keys.begin(), keys.end());
+        if (index >= keys.size()) {
+            return 0;
+        }
+        auto hit = all_tuples.find(keys[index]);
+        if (hit == all_tuples.end()) {
+            return 0;
+        }
+        return hit->second.CountNumRules();
     }
   protected:
     uint64_t inline KeyRulePrefix(const Rule& r) {

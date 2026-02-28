@@ -93,10 +93,11 @@ vector<SubHybridTSS *> SubHybridTSS::ConstructClassifier(const vector<int> &op, 
 
             uint32_t nrules = rules.size();
             nHashBit = 0;
-            while (nHashBit <= bit && (1 << nHashBit) - 1 < nrules * inflation_param) {
+            const int maxHashBits = 30; // guard against overflow of 1u << nHashBit on 32-bit int
+            while (nHashBit <= bit && nHashBit < maxHashBits && ((1u << nHashBit) - 1u) < nrules * static_cast<uint32_t>(inflation_param)) {
                 nHashBit ++;
             }
-            this->nHashTable = (1 << nHashBit) - 1;
+            this->nHashTable = (1u << nHashBit) - 1u;
             this->children.resize(nHashTable + 1, nullptr);
             vector<vector<Rule> > subRules(nHashTable + 1);
 

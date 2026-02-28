@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 #include "HybridTSS/HybridTSS.h"
 
 struct Options {

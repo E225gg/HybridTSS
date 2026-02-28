@@ -162,11 +162,21 @@ int main(int argc, char* argv[]) {
     // Open CSV metrics file
     auto metricsMode = opts.append_metrics ? ios::out | ios::app : ios::out;
     fMetrics.open(opts.metrics_path, metricsMode);
-    if (fMetrics.is_open() && !opts.append_metrics) {
-        fMetrics << "classifier,ruleset,num_rules,num_packets,"
-                 << "construction_time_ms,avg_classify_us,classify_mpps,"
-                 << "misclassified,avg_update_us,update_mpps,"
-                 << "ht_binth,ht_rtssleaf,ht_loop,ht_lr,ht_decay,ht_epsilon0,ht_epsilon_min,ht_epsilon_decay,ht_state_bits,ht_action_bits,ht_hash_inflation,ht_seed\n";
+    if (fMetrics.is_open()) {
+        bool needHeader = !opts.append_metrics;
+        if (opts.append_metrics) {
+            // Write header if file is empty
+            fMetrics.seekp(0, ios::end);
+            if (fMetrics.tellp() == 0) {
+                needHeader = true;
+            }
+        }
+        if (needHeader) {
+            fMetrics << "classifier,ruleset,num_rules,num_packets,"
+                     << "construction_time_ms,avg_classify_us,classify_mpps,"
+                     << "misclassified,avg_update_us,update_mpps,"
+                     << "ht_binth,ht_rtssleaf,ht_loop,ht_lr,ht_decay,ht_epsilon0,ht_epsilon_min,ht_epsilon_decay,ht_state_bits,ht_action_bits,ht_hash_inflation,ht_seed\n";
+        }
     }
 
     for (const auto& clf : opts.classifiers) {
