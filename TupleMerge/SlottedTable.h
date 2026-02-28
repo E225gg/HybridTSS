@@ -94,6 +94,12 @@ struct SlottedTable {
         cmap_destroy(&map_in_tuple);
     }
 
+    // Non-copyable and non-movable (owns cmap with internal pointers)
+    SlottedTable(const SlottedTable&) = delete;
+    SlottedTable& operator=(const SlottedTable&) = delete;
+    SlottedTable(SlottedTable&&) = delete;
+    SlottedTable& operator=(SlottedTable&&) = delete;
+
     bool IsEmpty() {
         return NumRules() == 0;
     }

@@ -20,8 +20,35 @@ struct Tuple {
         cmap_init(&map_in_tuple);
         Insertion(r);
     }
-    //~Tuple() { Destroy(); }
+    ~Tuple() { Destroy(); }
+
+    // Non-copyable: cmap has internal pointers — shallow copy causes double-free
+    Tuple(const Tuple&) = delete;
+    Tuple& operator=(const Tuple&) = delete;
+
+    // Move semantics: transfer cmap ownership, null out source
+    Tuple(Tuple&& other) noexcept
+        : map_in_tuple(other.map_in_tuple),
+          dims(std::move(other.dims)),
+          lengths(std::move(other.lengths)),
+          tuple(std::move(other.tuple))
+    {
+        other.map_in_tuple.impl = nullptr;
+    }
+    Tuple& operator=(Tuple&& other) noexcept {
+        if (this != &other) {
+            Destroy();
+            map_in_tuple = other.map_in_tuple;
+            dims = std::move(other.dims);
+            lengths = std::move(other.lengths);
+            tuple = std::move(other.tuple);
+            other.map_in_tuple.impl = nullptr;
+        }
+        return *this;
+    }
+
     void Destroy() {
+        if (!map_in_tuple.impl) return; // moved-from or already destroyed
         // Walk and delete all dynamically-allocated cmap_node objects
         cmap_cursor cursor = cmap_cursor_start(&map_in_tuple);
         while (cursor.node != nullptr) {
@@ -81,11 +108,7 @@ struct PriorityTuple : public Tuple {
 class TupleSpaceSearch : public PacketClassifier {
 
   public:
-    virtual ~TupleSpaceSearch() {
-        for (auto p : all_tuples) {
-            p.second.Destroy();
-        }
-    }
+    virtual ~TupleSpaceSearch() = default;
 
     void ConstructClassifier(const std::vector<Rule>& r);
     int ClassifyAPacket(const Packet& one_packet);
@@ -106,25 +129,27 @@ class TupleSpaceSearch : public PacketClassifier {
     }
     void PlotTupleDistribution() {
 
-        std::vector<std::pair<unsigned int, Tuple>> v;
-        copy(all_tuples.begin(), all_tuples.end(), back_inserter(v));
+        // Sort by rule count descending using pointers (Tuple is non-copyable)
+        std::vector<const Tuple*> v;
+        v.reserve(all_tuples.size());
+        for (const auto& pair : all_tuples) {
+            v.push_back(&pair.second);
+        }
 
-        auto cmp = [](const std::pair<unsigned int, Tuple>& lhs, const std::pair<unsigned int, Tuple>& rhs) {
-            return lhs.second.CountNumRules() > rhs.second.CountNumRules();
-        };
-        sort(v.begin(), v.end(), cmp);
+        std::sort(v.begin(), v.end(), [](const Tuple* lhs, const Tuple* rhs) {
+            return lhs->CountNumRules() > rhs->CountNumRules();
+        });
 
         std::ofstream log("logfile.txt", std::ios_base::app | std::ios_base::out);
         int sum = 0;
-        for (auto x : v) {
-            sum += x.second.CountNumRules();
+        for (const auto* t : v) {
+            sum += t->CountNumRules();
         }
         log << v.size() << " " << sum << " ";
         int left = 5;
-        for (auto x : v) {
-            log << x.second.CountNumRules() << " ";
-            left--;
-            if (left <= 0)
+        for (const auto* t : v) {
+            log << t->CountNumRules() << " ";
+            if (--left <= 0)
                 break;
         }
         log << std::endl;
@@ -175,10 +200,7 @@ class PriorityTupleSpaceSearch : public TupleSpaceSearch {
   public:
     ~PriorityTupleSpaceSearch() override {
         for (auto& pair : all_priority_tuples) {
-            if (pair.second) {
-                pair.second->Destroy();
-                delete pair.second;
-            }
+            delete pair.second;
         }
         all_priority_tuples.clear();
         priority_tuples_vector.clear();

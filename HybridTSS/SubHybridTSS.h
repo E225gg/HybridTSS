@@ -14,6 +14,13 @@ public:
     // base function
     SubHybridTSS(int inflation_param = 10);
     ~SubHybridTSS();
+
+    // Non-copyable and non-movable (owns raw pointer tree)
+    SubHybridTSS(const SubHybridTSS&) = delete;
+    SubHybridTSS& operator=(const SubHybridTSS&) = delete;
+    SubHybridTSS(SubHybridTSS&&) = delete;
+    SubHybridTSS& operator=(SubHybridTSS&&) = delete;
+
     explicit SubHybridTSS(const std::vector<Rule> &r, int inflation_param = 10);
     SubHybridTSS(const std::vector<Rule> &r, int s, SubHybridTSS* p, int inflation_param = 10);
     SubHybridTSS(const std::vector<Rule> &r, std::vector<int> offsetBit, int inflation_param = 10);

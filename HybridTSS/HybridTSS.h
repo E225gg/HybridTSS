@@ -23,6 +23,13 @@ class HybridTSS : public PacketClassifier {
 public:
     explicit HybridTSS(const HybridOptions& opts = HybridOptions());
     ~HybridTSS() override;
+
+    // Non-copyable and non-movable (owns raw pointer tree)
+    HybridTSS(const HybridTSS&) = delete;
+    HybridTSS& operator=(const HybridTSS&) = delete;
+    HybridTSS(HybridTSS&&) = delete;
+    HybridTSS& operator=(HybridTSS&&) = delete;
+
     void ConstructClassifier(const std::vector<Rule> &rules) override;
 
     int ClassifyAPacket(const Packet& packet) override;

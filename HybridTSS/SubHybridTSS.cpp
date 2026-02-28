@@ -427,13 +427,11 @@ void SubHybridTSS::FindRule(const Rule &rule) {
 void SubHybridTSS::recurDelete() {
     for (auto &iter : children) {
         if (iter) {
-            iter->recurDelete();
-            delete iter;
+            delete iter;    // ~SubHybridTSS() handles recursive cleanup
             iter = nullptr;
         }
     }
     if(bigClassifier) {
-        bigClassifier->recurDelete();
         delete bigClassifier;
         bigClassifier = nullptr;
     }
