@@ -2,9 +2,25 @@
 #define HYBRIDTSSV1_2_HYBRIDTSS_H
 #include "SubHybridTSS.h"
 
+struct HybridOptions {
+    int binth = 8;              // linear search threshold
+    double rtssleaf = 1.5;      // tuple merge vs hash threshold
+    int loop_num = 50;          // training episodes
+    double lr = 0.05;           // learning rate
+    double decay = 0.001;       // learning rate decay
+    double epsilon0 = 0.5;      // initial epsilon for exploration
+    double epsilon_min = 0.01;  // minimum epsilon
+    double epsilon_decay = 0.003; // epsilon decay factor
+    int state_bits = 20;        // bits for state space (size = 1<<state_bits)
+    int action_bits = 6;        // bits for action space (size = 1<<action_bits)
+    int progress_step = 10;     // progress print step (%), used in DEBUG
+    int hash_inflation = 10;    // hash table inflation factor in SubHybridTSS
+    uint64_t seed = 0;          // optional seed for training RNG (0 => time-based)
+};
+
 class HybridTSS : public PacketClassifier {
 public:
-    HybridTSS();
+    explicit HybridTSS(const HybridOptions& opts = HybridOptions());
     ~HybridTSS() override;
     void ConstructClassifier(const std::vector<Rule> &rules) override;
 
@@ -29,9 +45,10 @@ public:
 
 
 private:
-    int binth = 8;
+    HybridOptions options;
+    int binth;
     SubHybridTSS *root;
-    double rtssleaf = 1.5;
+    double rtssleaf;
     std::vector<std::vector<double> > QTable;
 
     void train(const std::vector<Rule> &rules);
