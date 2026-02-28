@@ -62,9 +62,9 @@ clean:
 
 # --- GoogleTest test suite (CMake-based) ---
 test:
-	@cmake -S . -B build -DCMAKE_BUILD_TYPE=Release 2>&1 | tail -1
-	@cmake --build build -j$$(nproc) 2>&1 | tail -5
-	@cd build && ctest --output-on-failure
+	cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+	cmake --build build -j$$(nproc)
+	cd build && ctest --output-on-failure
 
 test-verbose:
 	cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
