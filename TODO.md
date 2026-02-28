@@ -47,6 +47,27 @@
 
 ---
 
+## Planned / Next
+
+### OVS Integration (dpcls backend)
+- [ ] Define dpcls backend shim: miniflow/minimask → `Rule`/`Packet`, build/lookup/insert/delete/stats API
+- [ ] Decide update model: RCU swap (new instance build + pointer flip) and/or per-PMD instances; keep EMC behavior unchanged
+- [ ] Scope support matrix: IPv4 5-tuple + proto mask 0/0xFF only; unknown fields fall back to native dpcls
+
+### HybridTSS Configurability
+- [ ] Introduce `HybridOptions` to hold tunables (binth, rtssleaf, loop_num, lr, decay, epsilons, state/action bits, seed, inflation)
+- [ ] Plumb options from CLI/config into HybridTSS; keep current hardcoded defaults when unspecified
+- [ ] Record options into metrics (config id + JSON dump) for reproducibility; plan for optional pre-trained QTable load
+
+### Benchmark Driver (main.cpp)
+- [ ] Add CLI flags: classifiers selection, trials, run/skip updates, seed, metrics path (append/overwrite)
+- [ ] Isolate state: rebuild or copy before updates so runs don’t contaminate each other
+- [ ] Replace global randomness with mt19937_64 seeded from CLI; generate update sequence once per run
+
+### Observability
+- [ ] Define stats to expose (hit/miss, tuple/table counts, rules, build/training time, memory footprint, update latency)
+- [ ] Add lightweight per-PMD counters and unixctl/ovs-appctl dump format (no hot-path logging)
+
 ## Not Addressed — Known Pre-existing Issues
 
 ### UB in cmap_rehash (risk: too high to fix)
