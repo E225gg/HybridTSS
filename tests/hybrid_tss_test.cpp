@@ -4,7 +4,34 @@
 #include <gtest/gtest.h>
 #include "ElementaryClasses.h"
 #include "HybridTSS/HybridTSS.h"
+#include <atomic>
 #include <cstdio>
+#include <chrono>
+#include <cstdint>
+#include <string>
+#include <unistd.h>
+#include <utility>
+
+static std::string MakeTempQTablePath() {
+    static std::atomic<uint64_t> counter{0};
+    const auto now = static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
+    const uint64_t seq = counter.fetch_add(1, std::memory_order_relaxed);
+    return "Data/test_qtable_" + std::to_string(getpid()) + "_" + std::to_string(now) + "_" + std::to_string(seq) + ".bin";
+}
+
+class TempFileGuard {
+public:
+    explicit TempFileGuard(std::string path) : path_(std::move(path)) {}
+    ~TempFileGuard() {
+        if (!path_.empty()) {
+            remove(path_.c_str());
+        }
+    }
+    const std::string& path() const { return path_; }
+
+private:
+    std::string path_;
+};
 
 class HybridTSSTest : public ::testing::Test {
 protected:
@@ -82,4 +109,59 @@ TEST_F(HybridTSSTest, DeleteRuleDoesNotCrash) {
     for (int i = 0; i < 10 && i < NRules(); i++) {
         ASSERT_NO_FATAL_FAILURE(PC()->DeleteRule(rules[i]));
     }
+}
+
+TEST_F(HybridTSSTest, InferenceOnlyWithoutModelFails) {
+    HybridOptions opts;
+    opts.train_online = false;
+    HybridTSS infer_only(opts);
+
+    std::string err;
+    EXPECT_FALSE(infer_only.ConstructClassifierSafe(rules, &err));
+    EXPECT_FALSE(infer_only.IsReady());
+    EXPECT_FALSE(err.empty());
+    EXPECT_FALSE(infer_only.LastError().empty());
+}
+
+TEST_F(HybridTSSTest, TrainAndSaveThenLoadInferenceWorks) {
+    TempFileGuard qtable_guard(MakeTempQTablePath());
+    const std::string& qtable_path = qtable_guard.path();
+
+    HybridOptions train_opts;
+    train_opts.train_online = true;
+    train_opts.qtable_out_path = qtable_path;
+    train_opts.seed = 7;
+    HybridTSS trainer(train_opts);
+
+    std::string train_err;
+    ASSERT_TRUE(trainer.ConstructClassifierSafe(rules, &train_err)) << train_err;
+
+    FILE* f = fopen(qtable_path.c_str(), "rb");
+    ASSERT_NE(f, nullptr) << "QTable file was not created";
+    fclose(f);
+
+    HybridOptions infer_opts;
+    infer_opts.train_online = false;
+    infer_opts.qtable_in_path = qtable_path;
+    HybridTSS infer(infer_opts);
+
+    std::string infer_err;
+    ASSERT_TRUE(infer.ConstructClassifierSafe(rules, &infer_err)) << infer_err;
+    ASSERT_TRUE(infer.IsReady());
+
+    int nRules = NRules();
+    int misclassified = 0;
+    for (const auto& pkt : packets) {
+        int matchPri = infer.ClassifyAPacket(pkt);
+        int result = nRules - 1 - matchPri;
+        int expected = static_cast<int>(pkt[5]);
+        if (result == nRules && expected == nRules) {
+            continue;
+        }
+        if (result == nRules || expected < result) {
+            misclassified++;
+        }
+    }
+    EXPECT_EQ(misclassified, 0);
+
 }

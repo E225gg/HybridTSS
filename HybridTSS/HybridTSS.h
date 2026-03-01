@@ -2,6 +2,7 @@
 #define HYBRIDTSSV1_2_HYBRIDTSS_H
 #include "SubHybridTSS.h"
 #include <cstdint>
+#include <string>
 
 struct HybridOptions {
     int binth = 8;              // linear search threshold
@@ -17,6 +18,9 @@ struct HybridOptions {
     int progress_step = 10;     // progress print step (%), used in DEBUG
     int hash_inflation = 10;    // hash table inflation factor in SubHybridTSS
     uint64_t seed = 0;          // optional seed for training RNG (0 => time-based)
+    bool train_online = true;   // true: train in ConstructClassifier, false: require pre-trained QTable
+    std::string qtable_in_path; // optional input path for pre-trained QTable
+    std::string qtable_out_path; // optional output path to persist trained QTable
 };
 
 class HybridTSS : public PacketClassifier {
@@ -31,6 +35,12 @@ public:
     HybridTSS& operator=(HybridTSS&&) = delete;
 
     void ConstructClassifier(const std::vector<Rule> &rules) override;
+    bool ConstructClassifierSafe(const std::vector<Rule> &rules, std::string* err = nullptr);
+
+    bool LoadQTable(const std::string& path, std::string* err = nullptr);
+    bool SaveQTable(const std::string& path, std::string* err = nullptr) const;
+    bool IsReady() const;
+    const std::string& LastError() const;
 
     int ClassifyAPacket(const Packet& packet) override;
     void DeleteRule(const Rule& rule) override;
@@ -58,6 +68,11 @@ private:
     SubHybridTSS *root;
     double rtssleaf;
     std::vector<std::vector<double> > QTable;
+    bool qtable_loaded_;
+    std::string last_error_;
+
+    bool prepareQTable(const std::vector<Rule>& rules, std::string* err);
+    void buildTreeFromQTable(const std::vector<Rule>& rules);
 
     void train(const std::vector<Rule> &rules);
 };

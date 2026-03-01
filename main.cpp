@@ -25,10 +25,23 @@ ofstream fError("ErrorLog.csv", ios::app);
 ofstream fMetrics;  // CSV metrics output
 
 
-void testPerformance(PacketClassifier *p, const Options& opts, const vector<int>& updatePlan, bool isHybrid) {
+bool testPerformance(PacketClassifier *p, const Options& opts, const vector<int>& updatePlan, bool isHybrid) {
     cout << p->funName() << ":" << endl;
     Start = std::chrono::steady_clock::now();
-    p->ConstructClassifier(rules);
+    if (isHybrid) {
+        auto* hybrid = dynamic_cast<HybridTSS*>(p);
+        if (!hybrid) {
+            cerr << "Internal error: expected HybridTSS instance" << endl;
+            return false;
+        }
+        string err;
+        if (!hybrid->ConstructClassifierSafe(rules, &err)) {
+            cerr << "Failed to construct HybridTSS: " << err << endl;
+            return false;
+        }
+    } else {
+        p->ConstructClassifier(rules);
+    }
     End = std::chrono::steady_clock::now();
     elapsed_milliseconds = End - Start;
     double constructTime = elapsed_milliseconds.count();
@@ -127,6 +140,7 @@ void testPerformance(PacketClassifier *p, const Options& opts, const vector<int>
         }
         fMetrics << "\n";
     }
+    return true;
 }
 
 int main(int argc, char* argv[]) {
@@ -179,6 +193,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    bool hasFailures = false;
     for (const auto& clf : opts.classifiers) {
         // fresh update plan per classifier run to avoid cross-run mutation
         randUpdate.clear();
@@ -193,18 +208,25 @@ int main(int argc, char* argv[]) {
 
         if (clf == "pstss") {
             PacketClassifier *PSTSS = new PriorityTupleSpaceSearch();
-            testPerformance(PSTSS, opts, randUpdate, false);
+            if (!testPerformance(PSTSS, opts, randUpdate, false)) {
+                hasFailures = true;
+            }
             delete PSTSS;
         } else if (clf == "cuttss") {
             PacketClassifier *CT = new CutTSS();
-            testPerformance(CT, opts, randUpdate, false);
+            if (!testPerformance(CT, opts, randUpdate, false)) {
+                hasFailures = true;
+            }
             delete CT;
         } else if (clf == "hybrid") {
             PacketClassifier *HT = new HybridTSS(opts.hybrid_opts);
-            testPerformance(HT, opts, randUpdate, true);
+            if (!testPerformance(HT, opts, randUpdate, true)) {
+                hasFailures = true;
+            }
             delete HT;
         } else {
             cerr << "Unknown classifier name: " << clf << endl;
+            hasFailures = true;
         }
     }
 
@@ -212,5 +234,5 @@ int main(int argc, char* argv[]) {
         fMetrics.close();
     }
 
-    return 0;
+    return hasFailures ? 1 : 0;
 }

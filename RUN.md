@@ -24,6 +24,34 @@ Example:
 ./main -r ./Data/acl1_1k -p ./Data/acl1_1k_trace
 ```
 
+## Generate test data
+
+```bash
+uv run scripts/gen_testdata.py --rules 1000 --packets 10000 --seed 42 --out-dir Data
+```
+
+## HybridTSS model workflow (train once, infer many)
+
+### 1) Train and export QTable
+
+```bash
+./main -r ./Data/acl1_1k -p ./Data/acl1_1k_trace \
+  --classifier hybrid \
+  --ht-train-online 1 \
+  --ht-qtable-out ./Data/hybrid_acl1_1k.qtable
+```
+
+### 2) Inference-only (no online training)
+
+```bash
+./main -r ./Data/acl1_1k -p ./Data/acl1_1k_trace \
+  --classifier hybrid \
+  --ht-train-online 0 \
+  --ht-qtable-in ./Data/hybrid_acl1_1k.qtable
+```
+
+If `--ht-train-online 0` is used without `--ht-qtable-in`, the run fails fast with an explicit error.
+
 ## Lint
 
 ```bash

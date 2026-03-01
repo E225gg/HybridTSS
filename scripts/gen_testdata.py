@@ -4,7 +4,9 @@ Generate ClassBench-format rule files and matching packet trace files
 for testing HybridTSS.
 
 Usage:
-    python3 gen_testdata.py [--rules N] [--packets M] [--out-dir DIR] [--seed S]
+    uv run scripts/gen_testdata.py [--rules N] [--packets M] [--out-dir DIR] [--seed S]
+    # fallback:
+    python3 scripts/gen_testdata.py [--rules N] [--packets M] [--out-dir DIR] [--seed S]
 
 Outputs:
     <out-dir>/test_<N>        - rule file

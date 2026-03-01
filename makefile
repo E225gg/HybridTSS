@@ -8,6 +8,27 @@ CXXFLAGS = -std=c++14 -pedantic -fpermissive -fopenmp -O3 \
            -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare
 LDFLAGS = -fopenmp
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+GXX15 := $(shell which g++-15 2>/dev/null)
+ifeq ($(GXX15),)
+LIBOMP_PREFIX := $(shell brew --prefix libomp)
+CXX = clang++
+CXXFLAGS = -std=c++14 -pedantic -fpermissive -O3 \
+           -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare \
+           -Xpreprocessor -fopenmp -I$(LIBOMP_PREFIX)/include
+LDFLAGS = -L$(LIBOMP_PREFIX)/lib -lomp
+else
+CXX = $(GXX15)
+CXXFLAGS = -std=c++14 -pedantic -fpermissive -fopenmp -O3 \
+           -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare
+LDFLAGS = -fopenmp
+endif
+NPROC = $(shell sysctl -n hw.ncpu)
+else
+NPROC = $(shell nproc)
+endif
+
 # Debug build with sanitizers
 ifdef DEBUG
 CXXFLAGS += -g -O0 -DDEBUG
@@ -66,13 +87,13 @@ clean:
 
 # --- GoogleTest test suite (CMake-based) ---
 test:
-	cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-	cmake --build build -j$$(nproc)
+	cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=$(CXX)
+	cmake --build build -j$(NPROC)
 	cd build && ctest --output-on-failure
 
 test-verbose:
-	cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-	cmake --build build -j$$(nproc)
+	cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=$(CXX)
+	cmake --build build -j$(NPROC)
 	cd build && ctest --output-on-failure --verbose
 
 clean-test:
@@ -82,7 +103,7 @@ clean-test:
 
 # Quick smoke test on generated small dataset (uses defaults)
 smoketest: main
-	uv run gen_testdata.py --rules 50 --packets 200 --seed 9 --out-dir Data
+	uv run scripts/gen_testdata.py --rules 50 --packets 200 --seed 9 --out-dir Data
 	./main -r Data/test_50 -p Data/test_50_trace --classifier hybrid --ht-loop 5 --ht-hash-inflation 8 --ht-seed 9 --metrics results.csv
 	@grep -q "ht_binth" results.csv && echo "smoketest ok" || (echo "smoketest missing header" && false)
 
