@@ -193,6 +193,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    bool hasFailures = false;
     for (const auto& clf : opts.classifiers) {
         // fresh update plan per classifier run to avoid cross-run mutation
         randUpdate.clear();
@@ -207,18 +208,25 @@ int main(int argc, char* argv[]) {
 
         if (clf == "pstss") {
             PacketClassifier *PSTSS = new PriorityTupleSpaceSearch();
-            testPerformance(PSTSS, opts, randUpdate, false);
+            if (!testPerformance(PSTSS, opts, randUpdate, false)) {
+                hasFailures = true;
+            }
             delete PSTSS;
         } else if (clf == "cuttss") {
             PacketClassifier *CT = new CutTSS();
-            testPerformance(CT, opts, randUpdate, false);
+            if (!testPerformance(CT, opts, randUpdate, false)) {
+                hasFailures = true;
+            }
             delete CT;
         } else if (clf == "hybrid") {
             PacketClassifier *HT = new HybridTSS(opts.hybrid_opts);
-            testPerformance(HT, opts, randUpdate, true);
+            if (!testPerformance(HT, opts, randUpdate, true)) {
+                hasFailures = true;
+            }
             delete HT;
         } else {
             cerr << "Unknown classifier name: " << clf << endl;
+            hasFailures = true;
         }
     }
 
@@ -226,5 +234,5 @@ int main(int argc, char* argv[]) {
         fMetrics.close();
     }
 
-    return 0;
+    return hasFailures ? 1 : 0;
 }

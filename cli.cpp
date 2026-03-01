@@ -7,6 +7,11 @@
 
 using namespace std;
 
+namespace {
+constexpr int kMinQTableBits = 1;
+constexpr int kMaxQTableBits = 30;
+}
+
 vector<string> split(const string& s, char delim) {
     vector<string> out;
     string item;
@@ -194,6 +199,14 @@ bool parse_args(int argc, char* argv[], Options& opts) {
     }
 
     const bool runHybrid = std::find(opts.classifiers.begin(), opts.classifiers.end(), "hybrid") != opts.classifiers.end();
+    if (runHybrid && (opts.hybrid_opts.state_bits < kMinQTableBits || opts.hybrid_opts.state_bits > kMaxQTableBits)) {
+        cerr << "--ht-state-bits must be in [1, 30]" << endl;
+        return false;
+    }
+    if (runHybrid && (opts.hybrid_opts.action_bits < kMinQTableBits || opts.hybrid_opts.action_bits > kMaxQTableBits)) {
+        cerr << "--ht-action-bits must be in [1, 30]" << endl;
+        return false;
+    }
     if (runHybrid && !opts.hybrid_opts.train_online && opts.hybrid_opts.qtable_in_path.empty()) {
         cerr << "--ht-train-online 0 requires --ht-qtable-in <path>" << endl;
         return false;

@@ -3,6 +3,7 @@
 #include <atomic>
 #include <algorithm>
 #include <cstring>
+#include <stdexcept>
 
 using namespace std;
 
@@ -15,6 +16,24 @@ using namespace std;
 namespace {
 constexpr char kQTableMagic[4] = {'H', 'T', 'Q', '1'};
 constexpr uint32_t kQTableVersion = 1;
+constexpr int kMinQTableBits = 1;
+constexpr int kMaxQTableBits = 30;
+
+bool ValidateQTableBits(const HybridOptions& opts, string* err) {
+    if (opts.state_bits < kMinQTableBits || opts.state_bits > kMaxQTableBits) {
+        if (err) {
+            *err = "ht-state-bits must be in [1, 30]";
+        }
+        return false;
+    }
+    if (opts.action_bits < kMinQTableBits || opts.action_bits > kMaxQTableBits) {
+        if (err) {
+            *err = "ht-action-bits must be in [1, 30]";
+        }
+        return false;
+    }
+    return true;
+}
 }
 
 
@@ -38,7 +57,13 @@ HybridTSS::~HybridTSS() {
 // To-do: 结构过于冗余，待抽象根据QTable构建Classifier代码
 // -----------------------------------------------------------------------------
 void HybridTSS::ConstructClassifier(const vector<Rule> &rules) {
-    ConstructClassifierSafe(rules, nullptr);
+    string err;
+    if (!ConstructClassifierSafe(rules, &err)) {
+        if (last_error_.empty()) {
+            last_error_ = err.empty() ? "failed to construct HybridTSS" : err;
+        }
+        cerr << "Failed to construct HybridTSS: " << last_error_ << endl;
+    }
 }
 
 bool HybridTSS::ConstructClassifierSafe(const vector<Rule> &rules, string* err) {
@@ -64,6 +89,15 @@ bool HybridTSS::ConstructClassifierSafe(const vector<Rule> &rules, string* err) 
 }
 
 bool HybridTSS::prepareQTable(const vector<Rule>& rules, string* err) {
+    string bitErr;
+    if (!ValidateQTableBits(options, &bitErr)) {
+        last_error_ = bitErr;
+        if (err) {
+            *err = last_error_;
+        }
+        return false;
+    }
+
     if (options.train_online) {
         train(rules);
         qtable_loaded_ = true;
@@ -295,6 +329,15 @@ bool HybridTSS::SaveQTable(const string& path, string* err) const {
 }
 
 bool HybridTSS::LoadQTable(const string& path, string* err) {
+    string bitErr;
+    if (!ValidateQTableBits(options, &bitErr)) {
+        last_error_ = bitErr;
+        if (err) {
+            *err = last_error_;
+        }
+        return false;
+    }
+
     ifstream in(path, ios::binary);
     if (!in.is_open()) {
         last_error_ = "failed to open QTable input file: " + path;
@@ -347,8 +390,8 @@ bool HybridTSS::LoadQTable(const string& path, string* err) {
         return false;
     }
 
-    const uint32_t expectedRows = static_cast<uint32_t>(1u << options.state_bits);
-    const uint32_t expectedCols = static_cast<uint32_t>(1u << options.action_bits);
+    const uint32_t expectedRows = static_cast<uint32_t>(uint64_t{1} << options.state_bits);
+    const uint32_t expectedCols = static_cast<uint32_t>(uint64_t{1} << options.action_bits);
     if (rows != expectedRows || cols != expectedCols) {
         last_error_ = "QTable dimensions mismatch with state/action bits";
         if (err) {
@@ -549,10 +592,15 @@ inline int key_action(Key k) { return static_cast<int>(k & 0x3F); }
 // ------------------------------------------------------------
 void HybridTSS::train(const vector<Rule> &rules) {
 
+    string bitErr;
+    if (!ValidateQTableBits(options, &bitErr)) {
+        throw std::invalid_argument(bitErr);
+    }
+
     cout << "Starting parallel training with " << omp_get_max_threads() << " threads..." << endl;
 
-    const int stateSize = 1 << options.state_bits;
-    const int actionSize = 1 << options.action_bits;
+    const size_t stateSize = size_t{1} << options.state_bits;
+    const size_t actionSize = size_t{1} << options.action_bits;
     const int loopNum = options.loop_num;      // 減少以便測試
     const int progressStep = options.progress_step;
     const double lr = options.lr;         // 初始 learning rate
