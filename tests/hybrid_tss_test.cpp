@@ -4,14 +4,34 @@
 #include <gtest/gtest.h>
 #include "ElementaryClasses.h"
 #include "HybridTSS/HybridTSS.h"
+#include <atomic>
 #include <cstdio>
 #include <chrono>
+#include <cstdint>
 #include <string>
+#include <unistd.h>
+#include <utility>
 
 static std::string MakeTempQTablePath() {
-    auto now = std::chrono::steady_clock::now().time_since_epoch().count();
-    return "Data/test_qtable_" + std::to_string(now) + ".bin";
+    static std::atomic<uint64_t> counter{0};
+    const auto now = static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
+    const uint64_t seq = counter.fetch_add(1, std::memory_order_relaxed);
+    return "Data/test_qtable_" + std::to_string(getpid()) + "_" + std::to_string(now) + "_" + std::to_string(seq) + ".bin";
 }
+
+class TempFileGuard {
+public:
+    explicit TempFileGuard(std::string path) : path_(std::move(path)) {}
+    ~TempFileGuard() {
+        if (!path_.empty()) {
+            remove(path_.c_str());
+        }
+    }
+    const std::string& path() const { return path_; }
+
+private:
+    std::string path_;
+};
 
 class HybridTSSTest : public ::testing::Test {
 protected:
@@ -104,7 +124,8 @@ TEST_F(HybridTSSTest, InferenceOnlyWithoutModelFails) {
 }
 
 TEST_F(HybridTSSTest, TrainAndSaveThenLoadInferenceWorks) {
-    const std::string qtable_path = MakeTempQTablePath();
+    TempFileGuard qtable_guard(MakeTempQTablePath());
+    const std::string& qtable_path = qtable_guard.path();
 
     HybridOptions train_opts;
     train_opts.train_online = true;
@@ -143,5 +164,4 @@ TEST_F(HybridTSSTest, TrainAndSaveThenLoadInferenceWorks) {
     }
     EXPECT_EQ(misclassified, 0);
 
-    remove(qtable_path.c_str());
 }
