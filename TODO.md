@@ -58,6 +58,14 @@
 - [ ] Decide update model: RCU swap (new instance build + pointer flip) and/or per-PMD instances; keep EMC behavior unchanged
 - [ ] Scope support matrix: IPv4 5-tuple + proto mask 0/0xFF only; unknown fields fall back to native dpcls
 
+### Dataplane Readiness (OVS netdev userspace)
+- [x] Split training from inference path: `ConstructClassifierSafe()` now supports inference-only mode (`train_online=false`) with fail-fast behavior when no model is provided
+- [x] Add model artifact workflow: `SaveQTable`/`LoadQTable` with versioned binary format (`HTQ1`)
+- [x] Add immutable runtime engine API hooks for fast path (`ConstructClassifierSafe`, `IsReady`, `LastError`) and explicit not-ready behavior
+- [ ] Replace packet hot-path `std::vector` representation with fixed-size `PacketKey` struct for cache-friendly lookups
+- [ ] Define OVS PoC acceptance criteria: correctness parity vs native dpcls, throughput, p99 latency, update stall time
+- [ ] Add fallback policy: unsupported match fields automatically route to native dpcls backend
+
 ### HybridTSS Configurability
 - [x] Introduce `HybridOptions` to hold tunables (binth, rtssleaf, loop_num, lr, decay, epsilons, state/action bits, seed, inflation)
 - [x] Plumb options from CLI/config into HybridTSS; keep current hardcoded defaults when unspecified
@@ -67,10 +75,20 @@
 - [x] Add CLI flags: classifiers selection, trials, run/skip updates, seed, metrics path (append/overwrite)
 - [ ] Isolate state: rebuild or copy before updates so runs don’t contaminate each other
 - [x] Replace global randomness with mt19937_64 seeded from CLI; generate update sequence once per run
+- [x] Add HybridTSS model-mode CLI flags and validation: `--ht-train-online`, `--ht-qtable-in`, `--ht-qtable-out`
+
+### Testing
+- [x] Add inference-only failure-path test (no QTable input)
+- [x] Add train-save-load QTable roundtrip test for HybridTSS
 
 ### Observability
 - [ ] Define stats to expose (hit/miss, tuple/table counts, rules, build/training time, memory footprint, update latency)
 - [ ] Add lightweight per-PMD counters and unixctl/ovs-appctl dump format (no hot-path logging)
+
+### Dataset Toolchain
+- [ ] Evaluate and fork maintained dataset generator (`classbench-ng`) for long-term reproducibility
+- [ ] Add dataset manifest (seed, count, generator commit, checksum) and enforce it in CI
+- [ ] Keep local `gen_testdata.py` as a quick smoke-data generator; use ClassBench-ng datasets for reported benchmarks
 
 ## Not Addressed — Known Pre-existing Issues
 

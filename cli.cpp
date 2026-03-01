@@ -1,5 +1,6 @@
 #include "cli.h"
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <unordered_set>
@@ -38,7 +39,10 @@ void usage(const char* prog) {
          << "  --ht-state-bits <int>       HybridTSS state bits (default 20)\n"
          << "  --ht-action-bits <int>      HybridTSS action bits (default 6)\n"
          << "  --ht-hash-inflation <int>   HybridTSS hash inflation (default 10)\n"
-         << "  --ht-seed <u64>             HybridTSS training seed (0 => time-based)\n";
+         << "  --ht-seed <u64>             HybridTSS training seed (0 => time-based)\n"
+         << "  --ht-train-online <0|1>     HybridTSS train during construct (default 1)\n"
+         << "  --ht-qtable-in <path>       HybridTSS QTable input for inference-only\n"
+         << "  --ht-qtable-out <path>      HybridTSS QTable output after training\n";
 }
 
 bool parse_args(int argc, char* argv[], Options& opts) {
@@ -158,6 +162,23 @@ bool parse_args(int argc, char* argv[], Options& opts) {
             } catch (const std::exception&) {
                 cerr << "--ht-seed requires an integer" << endl; return false;
             }
+        } else if (arg == "--ht-train-online") {
+            if (i + 1 >= argc) { cerr << "--ht-train-online requires 0 or 1" << endl; return false; }
+            string value = argv[++i];
+            if (value == "0") {
+                opts.hybrid_opts.train_online = false;
+            } else if (value == "1") {
+                opts.hybrid_opts.train_online = true;
+            } else {
+                cerr << "--ht-train-online expects 0 or 1" << endl;
+                return false;
+            }
+        } else if (arg == "--ht-qtable-in") {
+            if (i + 1 >= argc) { cerr << "--ht-qtable-in requires a value" << endl; return false; }
+            opts.hybrid_opts.qtable_in_path = argv[++i];
+        } else if (arg == "--ht-qtable-out") {
+            if (i + 1 >= argc) { cerr << "--ht-qtable-out requires a value" << endl; return false; }
+            opts.hybrid_opts.qtable_out_path = argv[++i];
         } else {
             cerr << "Unknown argument: " << arg << endl;
             return false;
@@ -170,6 +191,12 @@ bool parse_args(int argc, char* argv[], Options& opts) {
 
     if (opts.classifiers.empty()) {
         opts.classifiers = {"pstss", "cuttss", "hybrid"};
+    }
+
+    const bool runHybrid = std::find(opts.classifiers.begin(), opts.classifiers.end(), "hybrid") != opts.classifiers.end();
+    if (runHybrid && !opts.hybrid_opts.train_online && opts.hybrid_opts.qtable_in_path.empty()) {
+        cerr << "--ht-train-online 0 requires --ht-qtable-in <path>" << endl;
+        return false;
     }
 
     // de-duplicate

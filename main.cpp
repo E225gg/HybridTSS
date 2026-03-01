@@ -25,10 +25,23 @@ ofstream fError("ErrorLog.csv", ios::app);
 ofstream fMetrics;  // CSV metrics output
 
 
-void testPerformance(PacketClassifier *p, const Options& opts, const vector<int>& updatePlan, bool isHybrid) {
+bool testPerformance(PacketClassifier *p, const Options& opts, const vector<int>& updatePlan, bool isHybrid) {
     cout << p->funName() << ":" << endl;
     Start = std::chrono::steady_clock::now();
-    p->ConstructClassifier(rules);
+    if (isHybrid) {
+        auto* hybrid = dynamic_cast<HybridTSS*>(p);
+        if (!hybrid) {
+            cerr << "Internal error: expected HybridTSS instance" << endl;
+            return false;
+        }
+        string err;
+        if (!hybrid->ConstructClassifierSafe(rules, &err)) {
+            cerr << "Failed to construct HybridTSS: " << err << endl;
+            return false;
+        }
+    } else {
+        p->ConstructClassifier(rules);
+    }
     End = std::chrono::steady_clock::now();
     elapsed_milliseconds = End - Start;
     double constructTime = elapsed_milliseconds.count();
@@ -127,6 +140,7 @@ void testPerformance(PacketClassifier *p, const Options& opts, const vector<int>
         }
         fMetrics << "\n";
     }
+    return true;
 }
 
 int main(int argc, char* argv[]) {
