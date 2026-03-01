@@ -41,7 +41,7 @@
   - [x] Extend metrics with HybridTSS configuration values for reproducibility
 
 ### Testing
-- [x] Create `gen_testdata.py` — generates ClassBench-format rules + matching packet traces
+- [x] Create `scripts/gen_testdata.py` — generates ClassBench-format rules + matching packet traces
 - [x] Generate test data — `Data/test_100` (100 rules), `Data/test_100_trace` (1000 packets)
 - [x] Verify all 3 classifiers (PSTSS, CutTSS, HybridTSS) produce correct results with generated data
 
@@ -88,7 +88,7 @@
 ### Dataset Toolchain
 - [ ] Evaluate and fork maintained dataset generator (`classbench-ng`) for long-term reproducibility
 - [ ] Add dataset manifest (seed, count, generator commit, checksum) and enforce it in CI
-- [ ] Keep local `gen_testdata.py` as a quick smoke-data generator; use ClassBench-ng datasets for reported benchmarks
+- [ ] Keep local `scripts/gen_testdata.py` as a quick smoke-data generator; use ClassBench-ng datasets for reported benchmarks
 
 ## Not Addressed — Known Pre-existing Issues
 
@@ -114,6 +114,6 @@ The OVS `cmap` code uses C-style `malloc`/`free`/`memset` to manage memory conta
 - `README.md`, `RUN.md`
 
 **Created files:**
-- `TODO.md`, `gen_testdata.py`
+- `TODO.md`, `scripts/gen_testdata.py`
 - `Data/test_100`, `Data/test_100_trace`
 - `results.csv` (benchmark output)

@@ -24,6 +24,12 @@ Example:
 ./main -r ./Data/acl1_1k -p ./Data/acl1_1k_trace
 ```
 
+## Generate test data
+
+```bash
+uv run scripts/gen_testdata.py --rules 1000 --packets 10000 --seed 42 --out-dir Data
+```
+
 ## HybridTSS model workflow (train once, infer many)
 
 ### 1) Train and export QTable

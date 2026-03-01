@@ -20,7 +20,7 @@ jobs:
           version: "latest"
 
       - name: Generate 1k test data (rules=1000, packets=10000)
-        run: uv run gen_testdata.py --rules 1000 --packets 10000 --seed 42 --out-dir Data
+        run: uv run scripts/gen_testdata.py --rules 1000 --packets 10000 --seed 42 --out-dir Data
 
       - name: Build
         run: make
