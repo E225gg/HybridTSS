@@ -612,6 +612,7 @@ void HybridTSS::train(const vector<Rule> &rules) {
 
 #ifdef DEBUG
     vector<double> rewardCurve(loopNum, 0.0);
+    vector<double> lossCurve(loopNum, 0.0);
 #endif
 
     QTable.assign(stateSize, vector<double>(actionSize, 0.0));
@@ -681,6 +682,8 @@ void HybridTSS::train(const vector<Rule> &rules) {
 
 #ifdef DEBUG
             double episodeReward = 0.0;
+            double episodeSqErr = 0.0;
+            int episodeUpdates = 0;
 #endif
 
             // thread-local Q-table 更新
@@ -696,14 +699,23 @@ void HybridTSS::train(const vector<Rule> &rules) {
                 count++;
 
                 auto it = Qlocal.find(k);
+#ifdef DEBUG
+                double q_old = 0.0;
+#endif
                 if (it == Qlocal.end()) {
                     Qlocal[k] = val;
                 } else {
+#ifdef DEBUG
+                    q_old = it->second;
+#endif
                     it->second += alpha * (val - it->second);
                 }
 
 #ifdef DEBUG
+                const double delta = val - q_old;
                 episodeReward += val;
+                episodeSqErr += delta * delta;
+                episodeUpdates++;
 #endif
             }
 
@@ -712,6 +724,10 @@ void HybridTSS::train(const vector<Rule> &rules) {
                 rewardCurve[i] = episodeReward;
             else
                 rewardCurve[i] = rewardCurve[i-1] + (episodeReward - rewardCurve[i-1]) / (i+1);
+
+            lossCurve[i] = (episodeUpdates > 0)
+                ? (episodeSqErr / static_cast<double>(episodeUpdates))
+                : 0.0;
 #endif
         }
     }
@@ -754,8 +770,9 @@ void HybridTSS::train(const vector<Rule> &rules) {
 
     cout << "Saving learning curve to learning_curve.csv ..." << endl;
     ofstream fout("learning_curve.csv");
+    fout << "episode,reward,loss\n";
     for (int i = 0; i < loopNum; i++) {
-        fout << i << "," << rewardCurve[i] << "\n";
+        fout << i << "," << rewardCurve[i] << "," << lossCurve[i] << "\n";
     }
     fout.close();
     cout << "Learning curve export finished" << endl;
