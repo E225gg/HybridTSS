@@ -57,3 +57,11 @@ If `--ht-train-online 0` is used without `--ht-qtable-in`, the run fails fast wi
 ```bash
 uvx cpp-linter --style file --lines-changed-only true --file-annotations false --tidy-checks="*"
 ```
+
+## Debug Training Curve
+
+When built with `make DEBUG=1`, HybridTSS training exports `learning_curve.csv` with:
+
+- `episode`
+- `reward` (running average episode reward)
+- `loss` (mean squared TD error per episode)

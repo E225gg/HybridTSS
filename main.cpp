@@ -64,9 +64,14 @@ bool testPerformance(PacketClassifier *p, const Options& opts, const vector<int>
         End = std::chrono::steady_clock::now();
         sumTime += End - Start;
         for (int j = 0; j < nPacket; j++) {
-            if (results[j] == nRules || packets[j][5] < results[j]) {
-                cout << rules[packets[j][5]].priority << "\t" << results[j] << "\t" << packets[j][5] << endl;
-            matchMiss++;
+            const int expected = static_cast<int>(packets[j][5]);
+            if (results[j] == nRules || expected < results[j]) {
+                if (expected >= 0 && expected < nRules) {
+                    cout << rules[expected].priority << "\t" << results[j] << "\t" << expected << endl;
+                } else {
+                    cout << "no_match\t" << results[j] << "\t" << expected << endl;
+                }
+                matchMiss++;
             }
         }
     }
