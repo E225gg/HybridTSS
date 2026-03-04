@@ -52,6 +52,9 @@ uv run scripts/gen_testdata.py --rules 1000 --packets 10000 --seed 42 --out-dir 
 
 If `--ht-train-online 0` is used without `--ht-qtable-in`, the run fails fast with an explicit error.
 
+For the frozen `HTQ1` binary contract (header/payload layout, compatibility,
+and loader failure reasons), see `docs/htq1-model-contract.md`.
+
 ## Lint
 
 ```bash
