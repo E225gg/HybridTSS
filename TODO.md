@@ -54,29 +54,30 @@
 ## Planned / Next
 
 ### Research Track (PR-based, OVS + OpenFlow first)
-- [x] PR1: Freeze model artifact contract (HTQ1)
+- [x] PR0: Freeze model artifact contract (HTQ1)
   - Scope: document `.qtable` header/payload layout, compatibility rules, and load failure reasons
   - Acceptance: same artifact loads reproducibly across machines; mismatch errors are explicit
-- [ ] PR2: Add OVS userspace backend shim (feature-flagged)
-  - Scope: dpcls backend skeleton for `build/lookup/insert/delete`; clean init/teardown path
+- [ ] PR1: Add OVS-like userspace backend shim in this repo (feature-flagged) [IN PROGRESS]
+  - Scope: add `build/lookup/insert/delete/stats` shim API; hybrid/native backend toggle
   - Acceptance: backend can be enabled/disabled safely; disabled path matches native behavior
-- [ ] PR3: Implement rule translation + fallback policy
+  - Decisions: default to auto-fallback to native on hybrid init/load unsupported/mismatch
+- [ ] PR2: Implement rule translation + fallback policy
   - Scope: support IPv4 5-tuple + proto mask (0/0xFF); unsupported matches fallback to native dpcls
   - Acceptance: OpenFlow rules classify correctly; fallback counter increments on unsupported rules
-- [ ] PR4: Add end-to-end research harness (parity + perf)
+- [ ] PR3: Add end-to-end research harness (parity + perf)
   - Scope: fixed-seed dataset/flows, HybridTSS vs native dpcls correctness parity, throughput/p99 scripts
   - Acceptance: reproducible report with correctness and performance numbers
-- [ ] PR5: Add reload/rollback lite (optional, recommended)
+- [ ] PR4: Add reload/rollback lite (optional, recommended)
   - Scope: build new instance then swap; keep old instance on failure; basic rollback command
   - Acceptance: reload does not break forwarding; failed reload keeps previous model active
-- [ ] PR6: Add minimal observability (optional)
+- [ ] PR5: Add minimal observability (optional)
   - Scope: `show-model`, `active_model_id`, `fallback_count`, `reload_success/fail`
   - Acceptance: enough runtime visibility for debugging without hot-path logging
 
 ### Milestones (research scope)
-- [ ] M1 (Week 1): PR1 + PR2 complete; userspace OVS backend compiles and can be toggled
-- [ ] M2 (Week 2): PR3 + PR4 complete; OpenFlow functional test + parity/perf results available
-- [ ] M3 (Week 3, optional): PR5 (+PR6 if time); basic safe reload and minimal runtime visibility
+- [ ] M1 (Week 1): PR1 complete; userspace OVS-like backend compiles and can be toggled
+- [ ] M2 (Week 2): PR2 + PR3 complete; OpenFlow-facing functional flow + parity/perf results available
+- [ ] M3 (Week 3, optional): PR4 (+PR5 if time); basic safe reload and minimal runtime visibility
 
 ### Out of Scope for research MVP
 - [ ] Kernel datapath integration
