@@ -124,6 +124,13 @@ cd build && ctest --output-on-failure
 ./main -r ./Data/acl1_1k -p ./Data/acl1_1k_trace --classifier hybrid --ht-loop 40 --ht-hash-inflation 8 --ht-seed 123
 ```
 
+### Model Artifact Contract
+
+- HybridTSS uses a versioned binary model artifact (`.qtable`) for train/use
+  separation.
+- Contract details (layout, compatibility, and failure reasons) are documented
+  in `docs/htq1-model-contract.md`.
+
 ## Input Formats
 
 ### Rule file (ClassBench format)
