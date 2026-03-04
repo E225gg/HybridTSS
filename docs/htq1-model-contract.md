@@ -5,7 +5,8 @@ training and inference can evolve independently.
 
 ## Scope
 
-- Artifact file extension: `.qtable` (binary)
+- Recommended artifact file extension: `.qtable` (binary; extension is
+  conventional only and not enforced by the runtime loader)
 - Producer: HybridTSS training path (`train_online=true` + `qtable_out_path`)
 - Consumer: HybridTSS inference path (`train_online=false` + `qtable_in_path`)
 - Current writer/reader implementation: `HybridTSS/HybridTSS.cpp`
@@ -50,7 +51,12 @@ Implication:
 
 ## Failure Reasons (Current Runtime Messages)
 
-The loader/writer reports explicit reasons through `LastError()` / output `err`:
+The loader (`LoadQTable()` / `ConstructClassifierSafe()`) reports reasons via
+`LastError()` and optional output `err`. The writer (`SaveQTable()`) reports
+reasons via output `err` only (it does not update `LastError()` directly unless
+the caller propagates the message).
+
+Current messages:
 
 - save path:
   - `QTable is empty; nothing to save`
@@ -66,7 +72,8 @@ The loader/writer reports explicit reasons through `LastError()` / output `err`:
   - `QTable dimensions mismatch with state/action bits`
   - `QTable payload truncated: <path>`
 - precondition path:
-  - `inference-only mode requires --ht-qtable-in`
+  - runtime API (`HybridTSS`): `inference-only mode requires --ht-qtable-in`
+  - CLI validator (`./main`): `--ht-train-online 0 requires --ht-qtable-in <path>`
   - `ht-state-bits must be in [1, 30]`
   - `ht-action-bits must be in [1, 30]`
 
