@@ -156,6 +156,27 @@ TEST(SubHybridTSSLinearDeleteTest, DuplicatePriorityDeletesOnlyMatchingId) {
     EXPECT_EQ(node.ClassifyAPacket(MakePacket(3)), 3);
 }
 
+TEST(SubHybridTSSHashInsertTest, EmptyBucketInsertPreservesChildContext) {
+    Rule initial = MakeExactRule(10, 1, 0x01000000);
+    Rule inserted = MakeExactRule(20, 2, 0x00100000);
+    SubHybridTSS node({initial}, 3);
+    node.ConstructClassifier({Hash, FieldSA, 0}, "build");
+
+    node.InsertRule(inserted);
+
+    EXPECT_EQ(node.ClassifyAPacket(MakePacket(initial.range[FieldSA][LowDim])), 10);
+    EXPECT_EQ(node.ClassifyAPacket(MakePacket(inserted.range[FieldSA][LowDim])), 20);
+
+    int hashChildStateCount = 0;
+    for (const auto& reward : node.getReward()) {
+        ASSERT_FALSE(reward.empty());
+        if (reward[0] == 1) {
+            hashChildStateCount++;
+        }
+    }
+    EXPECT_EQ(hashChildStateCount, 2);
+}
+
 TEST_F(HybridTSSTest, InferenceOnlyWithoutModelFails) {
     HybridOptions opts;
     opts.train_online = false;

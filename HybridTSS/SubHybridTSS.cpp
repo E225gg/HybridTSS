@@ -115,12 +115,12 @@ vector<SubHybridTSS *> SubHybridTSS::ConstructClassifier(const vector<int> &op, 
             }
             for (int i = 0; i < nHashTable + 1; i++) {
                 if (!subRules[i].empty()) {
-                    children[i] = new SubHybridTSS(subRules[i], hashChildenState, this);
+                    children[i] = new SubHybridTSS(subRules[i], hashChildenState, this, inflation_param);
                     children[i]->bigOffset = this->bigOffset;
                 }
             }
             if (!bigRules.empty()) {
-                this->bigClassifier = new SubHybridTSS(bigRules, hashBigState, this);
+                this->bigClassifier = new SubHybridTSS(bigRules, hashBigState, this, inflation_param);
                 this->bigClassifier->bigOffset = this->bigOffset;
                 this->bigClassifier->bigOffset[dim] = bit;
             }
@@ -255,7 +255,11 @@ void SubHybridTSS::InsertRule(const Rule &rule) {
                 if (children[Key]) {
                     children[Key]->InsertRule(rule);
                 } else {
-                    children[Key] = new SubHybridTSS({rule});
+                    int hashChildenState = state;
+                    hashChildenState |= (1 << (5 * dim));
+                    hashChildenState |= ((bit - (dim == 0 || dim == 1 ? 12 : 9)) << (5 * dim + 1));
+                    children[Key] = new SubHybridTSS({rule}, hashChildenState, this, inflation_param);
+                    children[Key]->bigOffset = this->bigOffset;
                     children[Key]->ConstructClassifier({linear, -1, -1}, "build");
                 }
             }
