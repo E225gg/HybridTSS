@@ -3,6 +3,7 @@
 #include <atomic>
 #include <algorithm>
 #include <cstring>
+#include <random>
 #include <stdexcept>
 
 using namespace std;
@@ -428,6 +429,11 @@ bool HybridTSS::LoadQTable(const string& path, string* err) {
 // To-do: 方法冗余待优化，编码方式待修改，目的支持单个维度多次选取
 // -----------------------------------------------------------------------------
 vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion) {
+    std::mt19937 gen(0);
+    return getAction(state, epsilion, gen);
+}
+
+vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion, std::mt19937& gen) {
     if (!state) {
         cout << "state node exist" << endl;
         exit(-1);
@@ -448,7 +454,6 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion) {
     if (static_cast<double>(nodeRules.size()) <= rtssleaf * static_cast<double>(tupleKey.size())) {
         return {TM, -1, -1};
     }
-    int num = rand() % 100;
     if (epsilion == 100) {
         // baseline
         if ((s & 1) == 0) {
@@ -487,6 +492,8 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion) {
     if (rews.empty()) {
         return {TM, -1, -1};
     }
+    std::uniform_int_distribution<int> percentDist(0, 99);
+    int num = percentDist(gen);
     if (num <= epsilion) {
         // E-greedy
         vector<int> op;
@@ -501,7 +508,8 @@ vector<int> HybridTSS::getAction(SubHybridTSS *state, int epsilion) {
         return op;
     } else {
         // random explore
-        int N = rand() % rews.size();
+        std::uniform_int_distribution<size_t> actionDist(0, rews.size() - 1);
+        size_t N = actionDist(gen);
         return Actions[N];
     }
 
@@ -626,13 +634,6 @@ void HybridTSS::train(const vector<Rule> &rules) {
     atomic<int> progressCounter(0);
     atomic<int> nextPrint(progressStep);
 
-#ifdef DEBUG
-    std::atomic<long long> lockAttempts{0};
-    std::atomic<long long> lockContended{0};
-    omp_lock_t qLock;
-    omp_init_lock(&qLock);
-#endif
-
     #pragma omp parallel
     {
         int tid = omp_get_thread_num();
@@ -672,7 +673,7 @@ void HybridTSS::train(const vector<Rule> &rules) {
 
             while (!que.empty()) {
                 SubHybridTSS *node = que.front(); que.pop();
-                vector<int> op = getAction(node, epsilon * 100.0);
+                vector<int> op = getAction(node, epsilon * 100.0, gen);
                 for (auto *child : node->ConstructClassifier(op, "train")) {
                     if (child) que.push(child);
                 }
@@ -735,38 +736,18 @@ void HybridTSS::train(const vector<Rule> &rules) {
 
     vector<vector<int>> QCount(stateSize, vector<int>(actionSize, 0));
 
-    #pragma omp parallel for schedule(static)
     for (int t = 0; t < numThreads; ++t) {
         for (const auto& kv : localQ[t]) {
             int s = key_state(kv.first);
             int a = key_action(kv.first);
             int c = localCount[t][kv.first];
 
-#ifdef DEBUG
-            lockAttempts++;
-            if (!omp_test_lock(&qLock)) {
-                lockContended++;
-                omp_set_lock(&qLock);
-            }
-#endif
-            #pragma omp critical
-            {
-                QTable[s][a] = (QTable[s][a] * QCount[s][a] + kv.second * c) / (QCount[s][a] + c);
-                QCount[s][a] += c;
-            }
-#ifdef DEBUG
-            omp_unset_lock(&qLock);
-#endif
+            QTable[s][a] = (QTable[s][a] * QCount[s][a] + kv.second * c) / (QCount[s][a] + c);
+            QCount[s][a] += c;
         }
     }
 
 #ifdef DEBUG
-    omp_destroy_lock(&qLock);
-    cout << "[DEBUG] Lock Attempts: " << lockAttempts << endl;
-    cout << "[DEBUG] Lock Contended: " << lockContended << endl;
-    cout << "[DEBUG] Contention Ratio: "
-         << (double)lockContended / lockAttempts * 100.0 << "%" << endl;
-
     vector<double> rewardCurve(loopNum, 0.0);
     double runningAvg = 0.0;
     for (int i = 0; i < loopNum; ++i) {

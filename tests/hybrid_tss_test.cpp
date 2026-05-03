@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <chrono>
 #include <cstdint>
+#include <fstream>
 #include <string>
 #include <unistd.h>
 #include <utility>
@@ -34,6 +35,11 @@ static std::string MakeTempQTablePath() {
     const auto now = static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
     const uint64_t seq = counter.fetch_add(1, std::memory_order_relaxed);
     return "Data/test_qtable_" + std::to_string(getpid()) + "_" + std::to_string(now) + "_" + std::to_string(seq) + ".bin";
+}
+
+static std::vector<char> ReadBinaryFile(const std::string& path) {
+    std::ifstream in(path, std::ios::binary);
+    return std::vector<char>(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
 }
 
 class TempFileGuard {
@@ -230,4 +236,38 @@ TEST_F(HybridTSSTest, TrainAndSaveThenLoadInferenceWorks) {
     }
     EXPECT_EQ(misclassified, 0);
 
+}
+
+TEST(HybridTSSDeterminismTest, SameSeedProducesIdenticalQTableArtifact) {
+    const std::vector<Rule> small_rules = {
+        MakeExactRule(40, 1, 0x01000000),
+        MakeExactRule(30, 2, 0x02000000),
+        MakeExactRule(20, 3, 0x03000000),
+        MakeExactRule(10, 4, 0x04000000),
+    };
+
+    TempFileGuard first_guard(MakeTempQTablePath());
+    TempFileGuard second_guard(MakeTempQTablePath());
+
+    HybridOptions opts;
+    opts.binth = 1;
+    opts.rtssleaf = 0.1;
+    opts.loop_num = 12;
+    opts.progress_step = 50;
+    opts.seed = 12345;
+    opts.qtable_out_path = first_guard.path();
+
+    HybridTSS first(opts);
+    std::string err;
+    ASSERT_TRUE(first.ConstructClassifierSafe(small_rules, &err)) << err;
+
+    opts.qtable_out_path = second_guard.path();
+    HybridTSS second(opts);
+    err.clear();
+    ASSERT_TRUE(second.ConstructClassifierSafe(small_rules, &err)) << err;
+
+    const auto first_qtable = ReadBinaryFile(first_guard.path());
+    const auto second_qtable = ReadBinaryFile(second_guard.path());
+    ASSERT_FALSE(first_qtable.empty());
+    EXPECT_EQ(first_qtable, second_qtable);
 }
