@@ -2,6 +2,7 @@
 #define HYBRIDTSSV1_2_HYBRIDTSS_H
 #include "SubHybridTSS.h"
 #include <cstdint>
+#include <random>
 #include <string>
 
 struct HybridOptions {
@@ -59,6 +60,7 @@ public:
 
     void printInfo();
     std::vector<int> getAction(SubHybridTSS *state, int epsilion);
+    std::vector<int> getAction(SubHybridTSS *state, int epsilion, std::mt19937& gen);
     void ConstructBaseline(const std::vector<Rule> &rules);
 
 
