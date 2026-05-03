@@ -20,6 +20,10 @@
 #include <chrono>
 #include <array>
 #include <climits>
+#include <cctype>
+#include <cstdio>
+#include <stdexcept>
+#include <string>
 
 // base
 constexpr int RULE_SIZE      = 16;
@@ -253,9 +257,35 @@ inline std::vector<Packet> loadpacket(FILE* fp) {
     unsigned int proto_mask, fid;
     int number_pkt = 0; // number of packets
     std::vector<Packet> packets;
-    while (true) {
-        if (fscanf(fp, "%u %u %u %u %u %u %u\n", &header[0], &header[1], &header[2], &header[3], &header[4], &proto_mask, &fid) == Null)
-            break;
+    std::array<char, 1024> line{};
+    int line_number = 0;
+    while (std::fgets(line.data(), static_cast<int>(line.size()), fp)) {
+        line_number++;
+        const char* cursor = line.data();
+        while (*cursor && std::isspace(static_cast<unsigned char>(*cursor))) {
+            cursor++;
+        }
+        if (*cursor == '\0') {
+            continue;
+        }
+
+        int parsed_chars = 0;
+        int parsed_fields = std::sscanf(cursor, "%u %u %u %u %u %u %u %n",
+                                        &header[0], &header[1], &header[2], &header[3],
+                                        &header[4], &proto_mask, &fid, &parsed_chars);
+        if (parsed_fields != 7) {
+            throw std::runtime_error("Malformed packet trace line " + std::to_string(line_number) +
+                                     ": expected 7 fields, parsed " + std::to_string(parsed_fields));
+        }
+        cursor += parsed_chars;
+        while (*cursor && std::isspace(static_cast<unsigned char>(*cursor))) {
+            cursor++;
+        }
+        if (*cursor != '\0') {
+            throw std::runtime_error("Malformed packet trace line " + std::to_string(line_number) +
+                                     ": unexpected trailing data");
+        }
+
         Packet p;
         p.push_back(header[0]);
         p.push_back(header[1]);
