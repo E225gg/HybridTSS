@@ -65,6 +65,9 @@ bool testPerformance(PacketClassifier *p, const Options& opts, const vector<int>
         sumTime += End - Start;
         for (int j = 0; j < nPacket; j++) {
             const int expected = static_cast<int>(packets[j][5]);
+            if (results[j] == nRules && expected == nRules) {
+                continue;
+            }
             if (results[j] == nRules || expected < results[j]) {
                 if (expected >= 0 && expected < nRules) {
                     cout << rules[expected].priority << "\t" << results[j] << "\t" << expected << endl;
