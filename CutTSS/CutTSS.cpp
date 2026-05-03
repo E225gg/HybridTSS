@@ -105,8 +105,8 @@ int CutTSS::ClassifyAPacket(const Packet& packet, uint64_t& Query) {
     if (nodeSet[2] && maxPri[2] > matchPri)
         matchPri = max(matchPri, trieLookup(packet, nodeSet[2], 2, Query));
     if (PSbig && maxPri[3] > matchPri) {
-        if (nodeSet[3]->classifier.size() < rtssleaf * PSbig->NumTables()) {
-            for (const Rule& rule : nodeSet[3]->classifier) {
+        if (subset.back().size() <= rtssleaf * PSbig->NumTables()) {
+            for (const Rule& rule : subset.back()) {
                 Query++;
                 if (rule.MatchesPacket(packet)) {
                     matchPri = max(matchPri, rule.priority);
@@ -528,11 +528,14 @@ void CutTSS::trieInsert(const Rule& insert_rule, CutTSSNode* root, int speedUpFl
 }
 
 size_t CutTSS::NumTables() const {
-    int totTables = 0;
-    for (int i = 0; i < subset.size(); i++) {
-        if (!subset.empty()) {
+    size_t totTables = 0;
+    for (const auto* node : nodeSet) {
+        if (node) {
             totTables++;
         }
+    }
+    if (PSbig) {
+        totTables++;
     }
     return totTables;
 }
