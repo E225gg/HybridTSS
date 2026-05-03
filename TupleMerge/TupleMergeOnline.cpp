@@ -92,6 +92,24 @@ TupleMergeOnline::TupleMergeOnline(const std::unordered_map<std::string, std::st
     : collideLimit(GetIntOrElse(args, "TM.Limit.Collide", 10)) {
 }
 
+namespace {
+
+uint64_t RuleAssignmentKey(const Rule& rule) {
+    return (static_cast<uint64_t>(static_cast<uint32_t>(rule.priority)) << 32) |
+           static_cast<uint32_t>(rule.id);
+}
+
+void RemoveMatchingRule(vector<Rule>& rules, const Rule& target) {
+    auto it = find_if(rules.begin(), rules.end(), [&](const Rule& rule) {
+        return rule.priority == target.priority && rule.id == target.id;
+    });
+    if (it != rules.end()) {
+        rules.erase(it);
+    }
+}
+
+} // namespace
+
 TupleMergeOnline::~TupleMergeOnline() {
     for (auto t : tables) {
         delete t;
@@ -117,14 +135,22 @@ int TupleMergeOnline::ClassifyAPacket(const Packet& p) {
     return prior;
 }
 void TupleMergeOnline::DeleteRule(const Rule& rule) {
-    SlottedTable* tbl = assignments[rule.priority];
-    assignments.erase(rule.priority);
+    auto assignment = assignments.find(RuleAssignmentKey(rule));
+    if (assignment == assignments.end()) {
+        return;
+    }
+    SlottedTable* tbl = assignment->second;
+    assignments.erase(assignment);
+    RemoveMatchingRule(rules, rule);
 
-    bool hasChanged;
+    bool hasChanged = false;
     tbl->Deletion(rule, hasChanged);
 
     if (tbl->IsEmpty()) {
-        tables.erase(find(tables.begin(), tables.end(), tbl), tables.end());
+        auto table_it = find(tables.begin(), tables.end(), tbl);
+        if (table_it != tables.end()) {
+            tables.erase(table_it);
+        }
         delete tbl;
     }
 
@@ -137,14 +163,21 @@ void TupleMergeOnline::DeleteRule(size_t index) {
     rules[index] = rules[rules.size() - 1];
     rules.pop_back();
 
-    SlottedTable* tbl = assignments[r.priority];
-    assignments.erase(r.priority);
+    auto assignment = assignments.find(RuleAssignmentKey(r));
+    if (assignment == assignments.end()) {
+        return;
+    }
+    SlottedTable* tbl = assignment->second;
+    assignments.erase(assignment);
 
-    bool hasChanged;
+    bool hasChanged = false;
     tbl->Deletion(r, hasChanged);
 
     if (tbl->IsEmpty()) {
-        tables.erase(find(tables.begin(), tables.end(), tbl), tables.end());
+        auto table_it = find(tables.begin(), tables.end(), tbl);
+        if (table_it != tables.end()) {
+            tables.erase(table_it);
+        }
         delete tbl;
     }
 
@@ -194,7 +227,7 @@ void TupleMergeOnline::InsertRule(const Rule& rule) {
             bool hasChanged = false;
             table->Insertion(rule, hasChanged);
 
-            assignments[rule.priority] = table;
+            assignments[RuleAssignmentKey(rule)] = table;
 
             if (table->NumCollisions(rule) > collideLimit) {
                 // Split Table
@@ -230,7 +263,7 @@ void TupleMergeOnline::InsertRule(const Rule& rule) {
                     if (target->CanInsert(t)) {
                         table->Deletion(r, hasChanged);
                         target->Insertion(r, hasChanged);
-                        assignments[r.priority] = target;
+                        assignments[RuleAssignmentKey(r)] = target;
                     }
                 }
             }
@@ -250,7 +283,7 @@ void TupleMergeOnline::InsertRule(const Rule& rule) {
         table->Insertion(rule, ignore);
         (void)ignore;  // [HybridTSS] Intentionally unused
         tables.push_back(table);
-        assignments[rule.priority] = table;
+        assignments[RuleAssignmentKey(rule)] = table;
         Resort();
     }
 }

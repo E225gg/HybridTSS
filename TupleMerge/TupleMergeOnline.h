@@ -99,7 +99,7 @@ class TupleMergeOnline : public PacketClassifier {
     SlottedTable* FindOrMake(const TupleMergeUtils::TupleTable& t);
 
     std::vector<SlottedTable*> tables;
-    std::unordered_map<int, SlottedTable*> assignments; // Priority -> Table
+    std::unordered_map<uint64_t, SlottedTable*> assignments; // Rule identity -> Table
 
     std::vector<Rule> rules;
 

@@ -135,11 +135,43 @@ void RunStagedUpdateCorrectness(PacketClassifier& classifier, ConstructFn constr
     ExpectClassifierMatchesBaseline(classifier, active_rules, packets, "after deleting inserted rule");
 }
 
+template <typename ConstructFn>
+void RunDuplicatePriorityDeleteCorrectness(PacketClassifier& classifier, ConstructFn construct) {
+    const Rule catch_all = MakeCatchAllRule(1, 1);
+    const Rule first = MakeExactSrcRule(10, 2, 0x0A000001);
+    const Rule second = MakeExactSrcRule(10, 3, 0x0A000002);
+
+    std::vector<Rule> active_rules = {first, second, catch_all};
+    const std::vector<Packet> packets = {
+        MakePacket(0x0A000001, 80),
+        MakePacket(0x0A000002, 80),
+        MakePacket(0x0A000003, 80),
+    };
+
+    construct(classifier, active_rules);
+    ExpectClassifierMatchesBaseline(classifier, active_rules, packets, "duplicate priority after build");
+
+    classifier.DeleteRule(first);
+    RemoveRule(active_rules, first);
+    ExpectClassifierMatchesBaseline(classifier, active_rules, packets, "duplicate priority after deleting first");
+
+    classifier.DeleteRule(second);
+    RemoveRule(active_rules, second);
+    ExpectClassifierMatchesBaseline(classifier, active_rules, packets, "duplicate priority after deleting second");
+}
+
 } // namespace
 
 TEST(UpdateCorrectnessTest, PSTSSInsertDeleteMatchesLinearScanBaseline) {
     PriorityTupleSpaceSearch classifier;
     RunStagedUpdateCorrectness(classifier, [](PacketClassifier& pc, const std::vector<Rule>& rules) {
+        pc.ConstructClassifier(rules);
+    });
+}
+
+TEST(UpdateCorrectnessTest, PSTSSDuplicatePriorityDeleteKeepsNeighbor) {
+    PriorityTupleSpaceSearch classifier;
+    RunDuplicatePriorityDeleteCorrectness(classifier, [](PacketClassifier& pc, const std::vector<Rule>& rules) {
         pc.ConstructClassifier(rules);
     });
 }
@@ -151,9 +183,46 @@ TEST(UpdateCorrectnessTest, CutTSSInsertDeleteMatchesLinearScanBaseline) {
     });
 }
 
+TEST(UpdateCorrectnessTest, CutTSSDuplicatePriorityDeleteKeepsNeighbor) {
+    CutTSS classifier;
+    RunDuplicatePriorityDeleteCorrectness(classifier, [](PacketClassifier& pc, const std::vector<Rule>& rules) {
+        pc.ConstructClassifier(rules);
+    });
+}
+
+TEST(UpdateCorrectnessTest, CutTSSInsertIntoEmptySubsetCreatesSearchPath) {
+    const Rule catch_all = MakeCatchAllRule(1, 1);
+    const Rule inserted = MakeExactSrcRule(10, 2, 0x0A000001);
+
+    CutTSS classifier;
+    std::vector<Rule> active_rules = {catch_all};
+    const std::vector<Packet> packets = {
+        MakePacket(0x0A000001, 80),
+        MakePacket(0x0A000002, 80),
+    };
+
+    classifier.ConstructClassifier(active_rules);
+    ExpectClassifierMatchesBaseline(classifier, active_rules, packets, "empty subset before insert");
+
+    classifier.InsertRule(inserted);
+    active_rules.push_back(inserted);
+    ExpectClassifierMatchesBaseline(classifier, active_rules, packets, "empty subset after insert");
+
+    classifier.DeleteRule(inserted);
+    RemoveRule(active_rules, inserted);
+    ExpectClassifierMatchesBaseline(classifier, active_rules, packets, "empty subset after delete");
+}
+
 TEST(UpdateCorrectnessTest, TupleMergeInsertDeleteMatchesLinearScanBaseline) {
     TupleMergeOnline classifier;
     RunStagedUpdateCorrectness(classifier, [](PacketClassifier& pc, const std::vector<Rule>& rules) {
+        pc.ConstructClassifier(rules);
+    });
+}
+
+TEST(UpdateCorrectnessTest, TupleMergeDuplicatePriorityDeleteKeepsNeighbor) {
+    TupleMergeOnline classifier;
+    RunDuplicatePriorityDeleteCorrectness(classifier, [](PacketClassifier& pc, const std::vector<Rule>& rules) {
         pc.ConstructClassifier(rules);
     });
 }
@@ -165,6 +234,17 @@ TEST(UpdateCorrectnessTest, HybridTSSHashInsertDeleteMatchesLinearScanBaseline) 
     HybridTSS classifier(options);
 
     RunStagedUpdateCorrectness(classifier, [](PacketClassifier& pc, const std::vector<Rule>& rules) {
+        static_cast<HybridTSS&>(pc).ConstructBaseline(rules);
+    });
+}
+
+TEST(UpdateCorrectnessTest, HybridTSSDuplicatePriorityDeleteKeepsNeighbor) {
+    HybridOptions options;
+    options.binth = 1;
+    options.rtssleaf = 0.1;
+    HybridTSS classifier(options);
+
+    RunDuplicatePriorityDeleteCorrectness(classifier, [](PacketClassifier& pc, const std::vector<Rule>& rules) {
         static_cast<HybridTSS&>(pc).ConstructBaseline(rules);
     });
 }
