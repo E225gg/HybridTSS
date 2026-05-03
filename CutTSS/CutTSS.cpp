@@ -28,6 +28,54 @@
 #include "CutTSS.h"
 using namespace std;
 
+namespace {
+
+vector<vector<int>> CutTSSPartitionThresholds(int threshold) {
+    vector<vector<int>> thre(3);
+    thre[0] = {threshold, threshold, -1, -1, -1};
+    thre[1] = {threshold, -1, -1, -1, -1};
+    thre[2] = {-1, threshold, -1, -1, -1};
+    return thre;
+}
+
+int CutTSSSubsetIndex(const Rule& rule, int threshold) {
+    if (rule.prefix_length[FieldSA] >= static_cast<unsigned>(threshold) &&
+        rule.prefix_length[FieldDA] >= static_cast<unsigned>(threshold)) {
+        return 0;
+    }
+    if (rule.prefix_length[FieldSA] >= static_cast<unsigned>(threshold)) {
+        return 1;
+    }
+    if (rule.prefix_length[FieldDA] >= static_cast<unsigned>(threshold)) {
+        return 2;
+    }
+    return 3;
+}
+
+int MaxPriorityOrMinusOne(const vector<Rule>& rules) {
+    int max_priority = -1;
+    for (const auto& rule : rules) {
+        max_priority = max(max_priority, rule.priority);
+    }
+    return max_priority;
+}
+
+void InsertSortedByPriority(vector<Rule>& rules, const Rule& rule) {
+    auto it = lower_bound(rules.begin(), rules.end(), rule);
+    rules.insert(it, rule);
+}
+
+void RemoveMatchingRule(vector<Rule>& rules, const Rule& target) {
+    auto it = find_if(rules.begin(), rules.end(), [&](const Rule& rule) {
+        return rule.priority == target.priority && rule.id == target.id;
+    });
+    if (it != rules.end()) {
+        rules.erase(it);
+    }
+}
+
+} // namespace
+
 CutTSS::CutTSS(int threshold, int bucketSize, int ratiotssleaf) {
     this->threshold = threshold;
     this->binth = bucketSize;
@@ -39,10 +87,7 @@ CutTSS::CutTSS(int threshold, int bucketSize, int ratiotssleaf) {
 
 void CutTSS::ConstructClassifier(const vector<Rule>& rules) {
     this->rules = rules;
-    vector<vector<int>> Thre(3);
-    Thre[0] = {threshold, threshold, -1, -1, -1};
-    Thre[1] = {threshold, -1, -1, -1, -1};
-    Thre[2] = {-1, threshold, -1, -1, -1};
+    vector<vector<int>> Thre = CutTSSPartitionThresholds(threshold);
 
     subset = partition(Thre, rules);
     nodeSet.resize(3, nullptr);
@@ -122,26 +167,60 @@ int CutTSS::ClassifyAPacket(const Packet& packet, uint64_t& Query) {
 }
 
 void CutTSS::DeleteRule(const Rule& delete_rule) {
-    if (delete_rule.prefix_length[0] >= threshold && delete_rule.prefix_length[1] >= threshold) {
+    int subset_index = CutTSSSubsetIndex(delete_rule, threshold);
+    if (subset_index == 0) {
         trieDelete(delete_rule, nodeSet[0], 3);
-    } else if (delete_rule.prefix_length[0] >= threshold) {
+    } else if (subset_index == 1) {
         trieDelete(delete_rule, nodeSet[1], 1);
-    } else if (delete_rule.prefix_length[1] >= threshold) {
+    } else if (subset_index == 2) {
         trieDelete(delete_rule, nodeSet[2], 2);
     } else {
-        PSbig->DeleteRule(delete_rule);
+        if (PSbig) {
+            PSbig->DeleteRule(delete_rule);
+        }
+    }
+
+    RemoveMatchingRule(rules, delete_rule);
+    if (subset_index >= 0 && subset_index < static_cast<int>(subset.size())) {
+        RemoveMatchingRule(subset[subset_index], delete_rule);
+        maxPri[subset_index] = MaxPriorityOrMinusOne(subset[subset_index]);
     }
 }
 
 void CutTSS::InsertRule(const Rule& insert_rule) {
-    if (insert_rule.prefix_length[0] >= threshold && insert_rule.prefix_length[1] >= threshold) {
-        trieInsert(insert_rule, nodeSet[0], 3);
-    } else if (insert_rule.prefix_length[0] >= threshold) {
-        trieInsert(insert_rule, nodeSet[1], 1);
-    } else if (insert_rule.prefix_length[1] >= threshold) {
-        trieInsert(insert_rule, nodeSet[2], 2);
+    int subset_index = CutTSSSubsetIndex(insert_rule, threshold);
+    InsertSortedByPriority(rules, insert_rule);
+    if (subset_index >= 0 && subset_index < static_cast<int>(subset.size())) {
+        InsertSortedByPriority(subset[subset_index], insert_rule);
+        maxPri[subset_index] = MaxPriorityOrMinusOne(subset[subset_index]);
+    }
+
+    vector<vector<int>> Thre = CutTSSPartitionThresholds(threshold);
+    if (subset_index == 0) {
+        if (!nodeSet[0]) {
+            nodeSet[0] = ConstructCutTSSTrie(subset[0], Thre[0], 0);
+        } else {
+            trieInsert(insert_rule, nodeSet[0], 3);
+        }
+    } else if (subset_index == 1) {
+        if (!nodeSet[1]) {
+            nodeSet[1] = ConstructCutTSSTrie(subset[1], Thre[1], 1);
+        } else {
+            trieInsert(insert_rule, nodeSet[1], 1);
+        }
+    } else if (subset_index == 2) {
+        if (!nodeSet[2]) {
+            nodeSet[2] = ConstructCutTSSTrie(subset[2], Thre[2], 2);
+        } else {
+            trieInsert(insert_rule, nodeSet[2], 2);
+        }
     } else {
-        PSbig->InsertRule(insert_rule);
+        if (!PSbig) {
+            PSbig = new PriorityTupleSpaceSearch();
+            PSbig->ConstructClassifier(subset.back());
+        } else {
+            PSbig->InsertRule(insert_rule);
+        }
     }
 }
 
@@ -489,7 +568,7 @@ void CutTSS::trieInsert(const Rule& insert_rule, CutTSSNode* root, int speedUpFl
     case 1: {
         while (node && !node->isLeaf) {
             numbit -= node->numbit[0];
-            cchild = (insert_rule.range[0][LowDim] >> numbit) & ANDBITS1;
+            cchild = (insert_rule.range[0][LowDim] >> numbit) & node->andbit[0];
             node = node->children[cchild];
         }
         break;
@@ -497,7 +576,7 @@ void CutTSS::trieInsert(const Rule& insert_rule, CutTSSNode* root, int speedUpFl
     case 2: {
         while (node && !node->isLeaf) {
             numbit -= node->numbit[1];
-            cchild = (insert_rule.range[1][LowDim] >> numbit) & ANDBITS1;
+            cchild = (insert_rule.range[1][LowDim] >> numbit) & node->andbit[1];
             node = node->children[cchild];
         }
         break;
@@ -506,9 +585,9 @@ void CutTSS::trieInsert(const Rule& insert_rule, CutTSSNode* root, int speedUpFl
         while (node && !node->isLeaf) {
             numbit1 -= node->numbit[0];
             numbit2 -= node->numbit[1];
-            cchild = ((insert_rule.range[0][LowDim] >> numbit1) & ANDBITS2) *
+            cchild = ((insert_rule.range[0][LowDim] >> numbit1) & node->andbit[0]) *
                          node->ncuts[1] +
-                     ((insert_rule.range[1][LowDim] >> numbit2) & ANDBITS2);
+                     ((insert_rule.range[1][LowDim] >> numbit2) & node->andbit[1]);
             node = node->children[cchild];
         }
     }
@@ -521,9 +600,7 @@ void CutTSS::trieInsert(const Rule& insert_rule, CutTSSNode* root, int speedUpFl
     if (node->nodeType == TSS) {
         node->PSTSS->InsertRule(insert_rule);
     } else {
-        //        auto iter = lower_bound(node->classifier.begin(), node->classifier.end(), insert_rule);
-        //        node->classifier.insert(iter, insert_rule);
-        node->classifier.push_back(insert_rule);
+        InsertSortedByPriority(node->classifier, insert_rule);
     }
 }
 
