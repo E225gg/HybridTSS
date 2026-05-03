@@ -429,7 +429,7 @@ bool SlottedTable::Deletion(const Rule& r, bool& priority_change) {
         unsigned int hash_r = HashRule(r);
         cmap_node* found_node = cmap_find(&map_in_tuple, hash_r);
         while (found_node != nullptr) {
-            if (found_node->priority == r.priority) {
+            if (found_node->priority == r.priority && found_node->rule_ptr->id == r.id) {
                 cmap_remove(&map_in_tuple, found_node, hash_r);
                 delete found_node;
                 break;
