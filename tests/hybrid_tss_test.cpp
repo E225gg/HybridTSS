@@ -12,6 +12,23 @@
 #include <unistd.h>
 #include <utility>
 
+static Rule MakeExactRule(int priority, int id, Point src_ip) {
+    Rule r;
+    r.priority = priority;
+    r.id = id;
+    r.prefix_length = {32, 0, 0, 0, 0};
+    r.range[FieldSA] = {{src_ip, src_ip}};
+    r.range[FieldDA] = {{0, 0xFFFFFFFF}};
+    r.range[FieldSP] = {{0, 65535}};
+    r.range[FieldDP] = {{0, 65535}};
+    r.range[FieldProto] = {{0, 255}};
+    return r;
+}
+
+static Packet MakePacket(Point src_ip) {
+    return {src_ip, 0, 0, 0, 0};
+}
+
 static std::string MakeTempQTablePath() {
     static std::atomic<uint64_t> counter{0};
     const auto now = static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
@@ -109,6 +126,34 @@ TEST_F(HybridTSSTest, DeleteRuleDoesNotCrash) {
     for (int i = 0; i < 10 && i < NRules(); i++) {
         ASSERT_NO_FATAL_FAILURE(PC()->DeleteRule(rules[i]));
     }
+}
+
+TEST(SubHybridTSSLinearDeleteTest, MissingRuleDoesNotEraseNeighbor) {
+    Rule high = MakeExactRule(10, 10, 10);
+    Rule low = MakeExactRule(5, 5, 5);
+    SubHybridTSS node({high, low});
+    node.ConstructClassifier({linear, -1, -1}, "build");
+
+    Rule missing = MakeExactRule(7, 7, 7);
+    node.DeleteRule(missing);
+
+    EXPECT_EQ(node.ClassifyAPacket(MakePacket(10)), 10);
+    EXPECT_EQ(node.ClassifyAPacket(MakePacket(5)), 5);
+    EXPECT_EQ(node.ClassifyAPacket(MakePacket(7)), -1);
+}
+
+TEST(SubHybridTSSLinearDeleteTest, DuplicatePriorityDeletesOnlyMatchingId) {
+    Rule first = MakeExactRule(9, 1, 1);
+    Rule second = MakeExactRule(9, 2, 2);
+    Rule lower = MakeExactRule(3, 3, 3);
+    SubHybridTSS node({first, second, lower});
+    node.ConstructClassifier({linear, -1, -1}, "build");
+
+    node.DeleteRule(second);
+
+    EXPECT_EQ(node.ClassifyAPacket(MakePacket(1)), 9);
+    EXPECT_EQ(node.ClassifyAPacket(MakePacket(2)), -1);
+    EXPECT_EQ(node.ClassifyAPacket(MakePacket(3)), 3);
 }
 
 TEST_F(HybridTSSTest, InferenceOnlyWithoutModelFails) {

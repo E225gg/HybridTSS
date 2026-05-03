@@ -189,7 +189,10 @@ void SubHybridTSS::DeleteRule(const Rule &rule) {
     switch (fun) {
         case linear: {
             auto iter = std::lower_bound(rules.begin(), rules.end(), rule);
-            if (iter == rules.end()) {
+            while (iter != rules.end() && iter->priority == rule.priority && iter->id != rule.id) {
+                ++iter;
+            }
+            if (iter == rules.end() || iter->priority != rule.priority || iter->id != rule.id) {
                 std::cout << "Not found" << std::endl;
                 return ;
             }
