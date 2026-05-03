@@ -4,6 +4,8 @@
 #include "ElementaryClasses.h"
 #include <cstdio>
 #include <cstring>
+#include <stdexcept>
+#include <string>
 
 // ---------------------------------------------------------------------------
 // Rule construction
@@ -212,4 +214,23 @@ TEST_F(LoadPacketTest, FidFieldIsReasonable) {
 TEST(LoadPacketTest_Edge, NullFilePointerReturnsEmpty) {
     auto packets = loadpacket(nullptr);
     EXPECT_TRUE(packets.empty());
+}
+
+TEST(LoadPacketTest_Edge, IncompletePacketRowThrowsWithLineContext) {
+    FILE* fp = std::tmpfile();
+    ASSERT_NE(fp, nullptr);
+    fputs("1 2 3 4 5 6 7\n", fp);
+    fputs("8 9 10 11 12 13\n", fp);
+    rewind(fp);
+
+    try {
+        (void)loadpacket(fp);
+        FAIL() << "expected malformed packet trace to throw";
+    } catch (const std::runtime_error& err) {
+        const std::string message = err.what();
+        EXPECT_NE(message.find("line 2"), std::string::npos) << message;
+        EXPECT_NE(message.find("expected 7 fields"), std::string::npos) << message;
+    }
+
+    fclose(fp);
 }
